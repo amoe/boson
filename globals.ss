@@ -22,7 +22,7 @@
 	 
 	 (export *sess-id-sep*
 		 *script-ext*)
-         (import)
+         (import (rnrs))
 
 	 (define *sess-id-sep* "$")
 	 (define *script-ext* "ss"))
