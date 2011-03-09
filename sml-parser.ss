@@ -22,13 +22,16 @@
 	 
 
 	 (export execute-embedded-script)
-         (import (rnrs))
+         (import (rnrs)
+                 (wak irregex))
 
 	 (define (execute-embedded-script sml-doc http-data)
 	   (parse-sml sml-doc http-data))
 
-	 (define *token-regex* (pregexp "\\$\\S[^)(\\[\\]<>|\\\\\"' ]+"))
-	 (define *tag-regex* (pregexp "<\\?spark(.*?)\\?>"))
+	 (define *token-regex*
+           (string->irregex "\\$\\S[^)(\\[\\]<>|\\\\\"' ]+"))
+	 (define *tag-regex*
+           (string->irregex "<\\?spark(.*?)\\?>"))
 	 (define *start-tag-len* (string-length "<?spark"))
 	 (define *end-tag-len* (string-length "?>"))
 
