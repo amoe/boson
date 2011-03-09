@@ -34,7 +34,7 @@
 
 	 (define http-value
 	   (case-lambda
-	    ((state name) (http-value state name null))
+	    ((state name) (http-value state name #f))
 	    ((state name def-value) (hash-table-get state name def-value))))
 
 	 (define (http-value! state name value)
