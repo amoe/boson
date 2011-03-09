@@ -18,7 +18,7 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-session-util
+(library (session-util)
 
 	 (export http-value http-value! 
 		 http-call http-keep-alive!
@@ -26,6 +26,7 @@
 		 http-share-state!
 		 http-share-state?
 		 make-default-session-state)
+         (import)
 
 	 (define *keep-alive* "*keep-alive*")
 	 (define *session-id* "*sesssion-id*")
