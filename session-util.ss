@@ -26,7 +26,7 @@
 		 http-share-state!
 		 http-share-state?
 		 make-default-session-state)
-         (import)
+         (import (rnrs))
 
 	 (define *keep-alive* "*keep-alive*")
 	 (define *session-id* "*sesssion-id*")
