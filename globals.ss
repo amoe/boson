@@ -18,10 +18,11 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-globals
+(library (globals)
 	 
 	 (export *sess-id-sep*
 		 *script-ext*)
+         (import)
 
 	 (define *sess-id-sep* "$")
 	 (define *script-ext* "ss"))
