@@ -18,11 +18,11 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-sml-parser
+(library (sml-parser)
 	 
-	 (require (lib "pregexp.ss"))
 
 	 (export execute-embedded-script)
+         (import)
 
 	 (define (execute-embedded-script sml-doc http-data)
 	   (parse-sml sml-doc http-data))
