@@ -21,7 +21,7 @@
 (library (url-encode)
 
 	 (export url-encode url-decode)
-         (import)
+         (import (rnrs))
 
 	 (define (url-encode str)
 	   (let ((encoded (open-output-string)))
