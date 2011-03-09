@@ -44,26 +44,25 @@
 	   (hashtable-ref state varname ""))
 
 	 (define (replace-tokens expr-str state)
-	   (let* ((res (pregexp-match *token-regex* expr-str))
-		  (ret expr-str))
-	     (while (list? res)
-		    (set! ret (pregexp-replace *token-regex* ret 
-					       (get-value 
-						(get-var-name (car res))
-						state)))
-		    (set! res (pregexp-match *token-regex* ret)))
-	     ret))
+           (let ((match (irregex-search *token-regex* expr-str)))
+             (if match
+                 (let ((var (irregex-match-substring match)))
+                   (replace-tokens
+                    (irregex-replace *token-regex* expr-str
+                                     (get-value (get-var-name var) state))
+                    state))
+                 expr-str)))
 
-	 (define (parse-sml sml-doc state)
-	   (let* ((res (pregexp-match *tag-regex* sml-doc))
-		  (ret sml-doc))
-	     (while (list? res)
-		    (set! ret (pregexp-replace *tag-regex*  
-					       ret
-					       (eval-script (car res) state)))
-		    (set! res (pregexp-match *tag-regex* ret)))
-	     ret))
-	 
+         (define (parse-sml sml-doc state)
+           (let ((match (irregex-search *tag-regex* sml-doc)))
+             (if match
+                 (let ((script (irregex-match-substring match)))
+                   (parse-sml
+                    (irregex-replace *tag-regex* sml-doc
+                                     (eval-script script state))
+                    state))
+                 sml-doc)))
+
 	 (define (eval-script script state)
 	   (let* ((spark-script (replace-tokens
 				 (substring script *start-tag-len* 
