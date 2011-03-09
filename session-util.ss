@@ -35,7 +35,7 @@
 	 (define http-value
 	   (case-lambda
 	    ((state name) (http-value state name #f))
-	    ((state name def-value) (hash-table-get state name def-value))))
+	    ((state name def-value) (hashtable-ref state name def-value))))
 
 	 (define (http-value! state name value)
 	   (hash-table-put! state name value))	 
@@ -52,10 +52,10 @@
 	   (hash-table-put! state *share-state* flag))
 
 	 (define (http-keep-alive? state)
-	   (hash-table-get state *keep-alive* #f))
+	   (hashtable-ref state *keep-alive* #f))
 
 	 (define (http-share-state? state)
-	   (hash-table-get state *share-state* #t))
+	   (hashtable-ref state *share-state* #t))
 	 
 	 (define (make-default-session-state id)
 	   (let ((state (make-hash-table 'equal)))
