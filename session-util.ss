@@ -38,7 +38,7 @@
 	    ((state name def-value) (hashtable-ref state name def-value))))
 
 	 (define (http-value! state name value)
-	   (hash-table-put! state name value))	 
+	   (hashtable-set! state name value))	 
 
 	 (define (http-call proc)
 	   (if (not (procedure? proc))
@@ -46,10 +46,10 @@
 	       (raise proc)))
 
 	 (define (http-keep-alive! state flag)
-	   (hash-table-put! state *keep-alive* flag))
+	   (hashtable-set! state *keep-alive* flag))
 
 	 (define (http-share-state! state flag)
-	   (hash-table-put! state *share-state* flag))
+	   (hashtable-set! state *share-state* flag))
 
 	 (define (http-keep-alive? state)
 	   (hashtable-ref state *keep-alive* #f))
@@ -59,7 +59,7 @@
 	 
 	 (define (make-default-session-state id)
 	   (let ((state (make-hash-table 'equal)))
-	     (hash-table-put! state *session-id* id)
-	     (hash-table-put! state *keep-alive* #f)
-	     (hash-table-put! state *share-state* #t)
+	     (hashtable-set! state *session-id* id)
+	     (hashtable-set! state *keep-alive* #f)
+	     (hashtable-set! state *share-state* #t)
 	     state)))
