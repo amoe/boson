@@ -23,6 +23,7 @@
 
 	 (export execute-embedded-script)
          (import (rnrs)
+                 (compat)
                  (wak irregex))
 
 	 (define (execute-embedded-script sml-doc http-data)
