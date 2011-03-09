@@ -21,7 +21,8 @@
 (library (url-encode)
 
 	 (export url-encode url-decode)
-         (import (rnrs))
+         (import (rnrs)
+                 (compat))
 
 	 (define (url-encode str)
            (call-with-string-output-port
