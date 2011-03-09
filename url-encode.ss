@@ -18,9 +18,10 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library url-encode
+(library (url-encode)
 
 	 (export url-encode url-decode)
+         (import)
 
 	 (define (url-encode str)
 	   (let ((encoded (open-output-string)))
