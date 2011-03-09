@@ -22,7 +22,7 @@
 	 
 
 	 (export execute-embedded-script)
-         (import)
+         (import (rnrs))
 
 	 (define (execute-embedded-script sml-doc http-data)
 	   (parse-sml sml-doc http-data))
