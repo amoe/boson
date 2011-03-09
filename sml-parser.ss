@@ -64,16 +64,18 @@
                  sml-doc)))
 
 	 (define (eval-script script state)
+           (call-with-string-output-port
+            (lambda (out)
 	   (let* ((spark-script (replace-tokens
 				 (substring script *start-tag-len* 
 					    (- (string-length script) *end-tag-len*))
 				 state))
-		  (in (open-input-string spark-script))
-		  (out (open-output-string))
+		  (in (open-string-input-port spark-script))
 		  (expr (read in)))
-	     (while (not (eof-object? expr))
-		    (let ((result (eval expr)))
-		      (if (not (void? result))
-			  (fprintf out "~a" result)))
-		    (set! expr (read in)))
-	     (get-output-string out))))
+             (let loop ()
+               (let ((expr (read in)))
+                  (when (not (eof-object? expr))
+                    (fprintf out "~a" (eval expr))
+                    (loop)))))))))
+                   
+
