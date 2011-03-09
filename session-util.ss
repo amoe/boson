@@ -58,7 +58,7 @@
 	   (hashtable-ref state *share-state* #t))
 	 
 	 (define (make-default-session-state id)
-	   (let ((state (make-hash-table 'equal)))
+	   (let ((state (make-hashtable equal-hash equal?)))
 	     (hashtable-set! state *session-id* id)
 	     (hashtable-set! state *keep-alive* #f)
 	     (hashtable-set! state *share-state* #t)
