@@ -5,4 +5,4 @@
   (export fprintf)
   (import (rnrs))
 
-  (define (fprintf . args) args))
+  (define (fprintf . args) (raise 'unimplemented)))
