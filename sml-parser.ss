@@ -41,7 +41,7 @@
 	       ""))
 	 
 	 (define (get-value varname state)
-	   (hash-table-get state varname ""))
+	   (hashtable-ref state varname ""))
 
 	 (define (replace-tokens expr-str state)
 	   (let* ((res (pregexp-match *token-regex* expr-str))
