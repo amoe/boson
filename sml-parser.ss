@@ -23,6 +23,7 @@
 
 	 (export execute-embedded-script)
          (import (rnrs)
+                 (rnrs eval)
                  (compat)
                  (wak irregex))
 
