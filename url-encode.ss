@@ -24,7 +24,8 @@
          (import (rnrs))
 
 	 (define (url-encode str)
-	   (let ((encoded (open-output-string)))
+           (call-with-string-output-port
+            (lambda (encoded)
 	     (map (lambda (c) 
 		    (cond 
 		     ((char-whitespace? c) 
@@ -33,12 +34,12 @@
 			  (char-punctuation? c))
 		      (fprintf encoded "~a" (encode-char c)))
 		     (else (fprintf encoded "~a" c))))
-		  (string->list str))
-	     (get-output-string encoded)))
+		  (string->list str)))))
 
 	 (define (url-decode str)
-	   (let ((decoded (open-output-string))
-		 (enc ()) (in-enc #f))
+           (call-with-string-output-port
+            (lambda (decoded)
+	   (let ((enc ()) (in-enc #f))
 	     (map (lambda (c)
 		    (cond 
 		     (in-enc
@@ -52,13 +53,12 @@
 		     ((char=? c #\+) (fprintf decoded "~c" #\space))
 		     ((char=? c #\%) (set! in-enc #t))
 		     (else (fprintf decoded "~c" c))))
-		  (string->list str))
-	     (get-output-string decoded)))
+		  (string->list str))))))
 
 	 (define (encode-char c)
-	   (let ((out (open-output-string)))
-	     (fprintf out "%~x" (char->integer c))
-	     (get-output-string out)))
+           (call-with-string-output-port
+            (lambda (out)
+	     (fprintf out "%~x" (char->integer c)))))
 
 	 (define (decode-char c)
 	   (integer->char (string->number c 16))))
