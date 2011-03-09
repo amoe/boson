@@ -41,7 +41,7 @@
 	 (define (url-decode str)
            (call-with-string-output-port
             (lambda (decoded)
-	   (let ((enc ()) (in-enc #f))
+	   (let ((enc '()) (in-enc #f))
 	     (map (lambda (c)
 		    (cond 
 		     (in-enc
@@ -50,7 +50,7 @@
 			  (begin
 			    (fprintf decoded "~c" 
 				     (decode-char (list->string (reverse enc))))
-			    (set! enc ())
+			    (set! enc '())
 			    (set! in-enc #f))))
 		     ((char=? c #\+) (fprintf decoded "~c" #\space))
 		     ((char=? c #\%) (set! in-enc #t))
