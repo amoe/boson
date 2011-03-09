@@ -37,7 +37,7 @@
 
 	 (define (get-var-name s)
 	   (if (> (string-length s) 1)
-	       (substring s 1)
+	       (substring s 1 (string-length s))
 	       ""))
 	 
 	 (define (get-value varname state)
