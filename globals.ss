@@ -24,4 +24,4 @@
 		 *script-ext*)
 
 	 (define *sess-id-sep* "$")
-	 (define *script-ext* #"ss"))
+	 (define *script-ext* "ss"))
