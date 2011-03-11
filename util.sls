@@ -4,7 +4,8 @@
 (library (util)
   (export char-symbolic?
           char-punctuation?
-          current-seconds)
+          current-seconds
+          hashtable-for-each)
   (import (rnrs)
           (prefix (srfi :19) srfi-19:))
 
@@ -16,4 +17,11 @@
   ; return current UTC seconds since epoch
   (define (current-seconds)
     (srfi-19:time-second (srfi-19:current-time)))
+
+  ; "applies the procedure proc to each element in hashtable (for the
+  ; side-effects of proc) in an unspecified order and returns void. The
+  ; procedure proc must take two arguments: a key and its value."
+  (define (hashtable-for-each hashtable proc)
+    (let-values (((keys values) (hashtable-entries hashtable)))
+      (for-each proc keys values)))
 )

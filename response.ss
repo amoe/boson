@@ -111,7 +111,7 @@
 	       (fprintf out "~a~a"
 			(response-s-status-line resp)
 			crlf)
-	       (hash-table-for-each 
+	       (hashtable-for-each 
 		(response-s-headers resp)
 		(lambda (k v)
 		  (fprintf out "~a: ~a~a" k v crlf)))
