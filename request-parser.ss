@@ -134,7 +134,8 @@
 	       method))
 
 	 (define (http-request->string self)
-	   (let ((out (open-output-string)))
+           (call-with-string-output-port
+            (lambda (out)
 	     (fprintf out "~a ~a ~a~n" 
 		      (http-request-s-method self)
 		      (http-request-s-uri self)	     
@@ -143,6 +144,6 @@
 			     (lambda (k v) (fprintf out "~a: ~a~n" k v)))
 	     (fprintf out "~n")
 	     (if (not (null? (http-request-s-data self)))
-		 (fprintf out "~a" (http-request-s-data self)))
-	     (get-output-string out))))
+		 (fprintf out "~a" (http-request-s-data self))))))
 
+)
