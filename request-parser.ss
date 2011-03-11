@@ -35,7 +35,9 @@
 		 http-parser-error?
 		 http-parser-error-message)
 
-	 (import (rnrs) (url-encode))
+	 (import (rnrs)
+                 (url-encode)
+                 (spells string-utils))
 
 	 (define-record-type http-request-s
            (fields
@@ -68,7 +70,7 @@
 
 	 ;; "method uri http-version" -> self!
 	 (define (http-request-request! self line)
-	   (let ((tokens (string-split line)))
+	   (let ((tokens (string-split line #\space)))
 	     (if (not (= (length tokens) 3))
 		 (raise (make-http-parser-error "Invalid HTTP request.")))
 	     (let ((index 0) (uri null))
@@ -110,11 +112,11 @@
 
 	 (define (parse-request-data req)
 	   (if (not (null? req))	       
-	       (let ((key-values (string-split req '(#\&)))
+	       (let ((key-values (string-split req #\&))
 		     (ret (make-hashtable equal-hash equal?)))
 		 (let loop ((kw key-values))
 		   (if (not (null? kw))
-		       (let* ((split (string-split (car kw) '(#\=)))
+		       (let* ((split (string-split (car kw) #\=))
 			      (key (url-decode (car split)))
 			      (value (url-decode (car (cdr split)))))
 			 (hash-table-put! ret key value)
