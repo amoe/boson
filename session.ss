@@ -41,7 +41,7 @@
                             session-s-last-access set-session-s-last-access!)))
 
 	 (define *session-id* 0)
-	 (define *vars-sep* "?")
+	 (define *vars-sep* #\?)
 
 	 (define (session-last-access session)
 	   (session-s-last-access session))
@@ -144,5 +144,7 @@
                  url)))
 
 	 (define (remove-vars url)
-	   (let ((idx (string-find url *vars-sep*)))
-	     (if (>= idx 0) (substring url 0 idx) url))))
+	   (let ((idx (string-index url *vars-sep*)))
+	     (if (and idx (>= idx 0))
+                 (substring url 0 idx)
+                 url))))
