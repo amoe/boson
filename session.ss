@@ -76,8 +76,9 @@
 		 (let ((proc-count (+ p-count 1)))
 		   (let ((state (session-s-state sess)) 
 			 (res-html #f))
-		     (hash-table-map state-to-add 
-				     (lambda (k v) (hashtable-set! state k v)))
+		     (hashtable-for-each
+                      state-to-add 
+                      (lambda (k v) (hashtable-set! state k v)))
 		     (try
 		      (cond ((not (http-share-state? state))
 			     (set! sess (session-remap sess sessions))
