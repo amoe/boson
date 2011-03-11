@@ -38,7 +38,8 @@
 	 (import (rnrs)
                  (url-encode)
                  (spells string-utils)
-                 (only (srfi :13) string-trim-both))
+                 (only (srfi :13) string-index
+                       string-trim-both))
 
 	 (define-record-type http-request-s
            (fields
@@ -86,10 +87,10 @@
 
 	 ;; "key: value" -> self!
 	 (define (http-request-header! self line)
-	   (let ((idx (string-find line ":")))
-	     (if (not (= idx -1))
+	   (let ((idx (string-index line #\:)))
+	     (if idx
 		 (let ((key (substring line 0 idx))
-		       (value (string-trim (substring line (+ idx 1)))))
+		       (value (string-trim-both (substring line (+ idx 1)))))
 		   (hash-table-put! (http-request-s-headers self) 
 				    (string-downcase key) value))
 		 (raise (make-http-parser-error "Invalid header.")))))
