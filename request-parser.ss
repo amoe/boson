@@ -18,8 +18,7 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-request-parser
-	 
+(library (request-parser)
 	 (export http-request
 		 http-request-request!
 		 http-request-header!
