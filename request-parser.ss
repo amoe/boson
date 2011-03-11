@@ -37,7 +37,8 @@
 
 	 (import (rnrs)
                  (url-encode)
-                 (spells string-utils))
+                 (spells string-utils)
+                 (only (srfi :13) string-trim-both))
 
 	 (define-record-type http-request-s
            (fields
@@ -73,21 +74,15 @@
 	   (let ((tokens (string-split line #\space)))
 	     (if (not (= (length tokens) 3))
 		 (raise (make-http-parser-error "Invalid HTTP request.")))
-	     (let ((index 0) (uri #f))
-	       (for token in tokens
-		    (cond
-		     ((= index 0)
-		      (set-http-request-s-method! 
-		       self
-		       (assert-method (string->symbol token))))
-		     ((= index 1)
-		      (set! uri (string-trim token))
-		      (set-http-request-s-uri! self uri)
-		      (set-http-request-s-data! 
-		       self (parse-request-data (extract-request-data uri))))
-		     ((= index 3)
-		      (set-http-request-s-version! self token)))
-		    (set! index (add1 index))))))
+             (let-values (((t1 t2 t3) (apply values tokens)))
+               (set-http-request-s-method! self
+                                           (assert-method (string->symbol t1)))
+               (let ((uri (string-trim-both t2)))
+                     (set-http-request-s-uri! self uri)
+                     (set-http-request-s-data! self
+                                               (parse-request-data
+                                                (extract-request-data uri))))
+               (set-http-request-s-version! self t3))))
 
 	 ;; "key: value" -> self!
 	 (define (http-request-header! self line)
