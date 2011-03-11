@@ -101,13 +101,13 @@
 	    self (parse-request-data body)))
 
 	 (define (extract-request-data url)
-	   (let ((idx (string-find url "?")))
-	     (if (> idx 0)
+	   (let ((idx (string-index url #\?)))
+	     (if idx
 		 (substring url (+ idx 1))
-		 null)))
+		 #f)))
 
 	 (define (parse-request-data req)
-	   (if (not (null? req))	       
+	   (if req
 	       (let ((key-values (string-split req #\&))
 		     (ret (make-hashtable equal-hash equal?)))
 		 (let loop ((kw key-values))
