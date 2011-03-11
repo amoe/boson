@@ -130,10 +130,12 @@
 
 	 (define (find-session-id url)
 	   (let ((idx (string-index url *sess-id-sep*)))
-	     (if (= idx -1) -1
-		 (let ((end-idx (string-find url (+ idx 1) *sess-id-sep*)))
-		   (if (> idx 0)
-		       (string->number (substring url (+ idx 1) end-idx))
+	     (if (not idx)
+                 -1
+		 (let ((end-idx (string-index url *sess-id-sep* (+ idx 1))))
+		   (if (and end-idx (> end-idx 0))
+		       ;(string->number (substring url (+ idx 1) end-idx))
+		       (substring url (+ idx 1) end-idx)
 		       -1)))))
 
 	 (define (normalize-url url)
