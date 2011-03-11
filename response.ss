@@ -50,39 +50,39 @@
 				content-length 
 				content-type
 				content-mod)
-           (make-response-s 
-             (call-with-string-output-port
-              (lambda (status-line)
-                (let ((headers (make-hashtable equal-hash equal?)))
-                  (fprintf status-line "~a 200 OK" version)
-                  (hashtable-set! headers "Date"
-                                   (date-str (gmt-date (current-seconds))))
-                  (hashtable-set! headers "Content-Type" content-type)
-                  (hashtable-set! headers "Content-Length"
-                                   content-length)
-                  (hashtable-set! headers "Last-Modified"
-                                   (date-str (gmt-date content-mod))))))
+           (let ((headers (make-hashtable equal-hash equal?)))
+             (hashtable-set! headers "Date"
+                             (date-str (gmt-date (current-seconds))))
+             (hashtable-set! headers "Content-Type" content-type)
+             (hashtable-set! headers "Content-Length"
+                             content-length)
+             (hashtable-set! headers "Last-Modified"
+                             (date-str (gmt-date content-mod)))
+             (make-response-s 
+              (call-with-string-output-port
+               (lambda (status-line)
+                 (fprintf status-line "~a 200 OK" version)))
               headers
-              content))
+              content)))
 
 	 (define (make-error-response error-message 
 				      error-code 
 				      version)
-           (make-response-s
-            (call-with-string-output-port
-             (lambda (status-line)
-               (let ((headers (make-hashtable equal-hash equal?)))
+           (let ((headers (make-hashtable equal-hash equal?)))
+             (hashtable-set! headers "Date"
+                             (date-str (gmt-date (current-seconds))))
+             (hashtable-set! headers "Content-Type" "text/html")
+             (hashtable-set! headers "Content-Length"
+                             (string-length error-message))
+             (make-response-s
+              (call-with-string-output-port
+               (lambda (status-line)
                  (fprintf status-line "~a ~a ~a" 
                           version 
                           error-code
-                          error-message)
-                 (hashtable-set! headers "Date"
-                                  (date-str (gmt-date (current-seconds))))
-                 (hashtable-set! headers "Content-Type" "text/html")
-                 (hashtable-set! headers "Content-Length"
-                                  (string-length error-message)))))
-            headers
-            error-message)) 
+                          error-message)))
+              headers
+              error-message)) )
 
 	 (define (response-status-line r) 
 	   (response-s-status-line r))
