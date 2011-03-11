@@ -27,7 +27,8 @@
 	 (import (rnrs)
                  (util)
                  (globals)
-                 (session-util))
+                 (session-util)
+                 (only (srfi :1) list-index))
 
 	 (define-record-type session-s
            (fields id
