@@ -48,7 +48,7 @@
 				content-length 
 				content-type
 				content-mod)
-	   (let ((headers (make-hash-table 'equal))
+	   (let ((headers (make-hashtable equal-hash equal?))
 		 (status-line (open-output-string)))
 	     (fprintf status-line "~a 200 OK" version)
 	     (hash-table-put! headers "Date"
@@ -64,7 +64,7 @@
 	 (define (make-error-response error-message 
 				      error-code 
 				      version)
-	   (let ((headers (make-hash-table 'equal))
+	   (let ((headers (make-hashtable equal-hash equal?))
 		 (status-line (open-output-string)))
 	     (fprintf status-line "~a ~a ~a" 
 		      version 
