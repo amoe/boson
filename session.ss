@@ -29,7 +29,8 @@
                  (globals)
                  (session-util)
                  (compat)
-                 (only (srfi :1) list-index))
+                 (only (srfi :1) list-index)
+                 (only (srfi :13) string-index))
 
 	 (define-record-type session-s
            (fields id
@@ -128,7 +129,7 @@
                           *sess-id-sep* sess-id proc-count *sess-id-sep*))))))
 
 	 (define (find-session-id url)
-	   (let ((idx (string-find url *sess-id-sep*)))
+	   (let ((idx (string-index url *sess-id-sep*)))
 	     (if (= idx -1) -1
 		 (let ((end-idx (string-find url (+ idx 1) *sess-id-sep*)))
 		   (if (> idx 0)
