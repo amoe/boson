@@ -54,12 +54,12 @@
               (lambda (status-line)
                 (let ((headers (make-hashtable equal-hash equal?)))
                   (fprintf status-line "~a 200 OK" version)
-                  (hash-table-put! headers "Date"
+                  (hashtable-set! headers "Date"
                                    (date-str (gmt-date (current-seconds))))
-                  (hash-table-put! headers "Content-Type" content-type)
-                  (hash-table-put! headers "Content-Length"
+                  (hashtable-set! headers "Content-Type" content-type)
+                  (hashtable-set! headers "Content-Length"
                                    content-length)
-                  (hash-table-put! headers "Last-Modified"
+                  (hashtable-set! headers "Last-Modified"
                                    (date-str (gmt-date content-mod))))))
               headers
               content))
@@ -75,10 +75,10 @@
                           version 
                           error-code
                           error-message)
-                 (hash-table-put! headers "Date"
+                 (hashtable-set! headers "Date"
                                   (date-str (gmt-date (current-seconds))))
-                 (hash-table-put! headers "Content-Type" "text/html")
-                 (hash-table-put! headers "Content-Length"
+                 (hashtable-set! headers "Content-Type" "text/html")
+                 (hashtable-set! headers "Content-Length"
                                   (string-length error-message)))))
             headers
             error-message)) 
