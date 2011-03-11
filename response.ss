@@ -32,7 +32,8 @@
 		 response->string)
          (import (rnrs)
                  (compat)
-                 (util))
+                 (util)
+                 (srfi :19))
 	 
 	 (define-record-type response-s
            (fields
@@ -132,8 +133,7 @@
 		      (date-second d)))))
 
 	 (define (gmt-date secs)
-	   (let ((d (seconds->date secs)))
-	     (seconds->date (- secs (date-time-zone-offset d)))))
+           (time-monotonic->date (make-time time-monotonic 0 secs)))
 
 	 (define (week-day->string wd)
 	   (case wd
