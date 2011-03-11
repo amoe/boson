@@ -97,9 +97,9 @@
 	 (define (response-body! r b)
 	   (set-response-s-body! r b))
 	 (define (response-header-value headers key)
-	   (hash-table-get headers key))
+	   (hashtable-ref headers key))
 	 (define (response-header-value! headers key value)
-	   (hash-table-put! headers key value))
+	   (hashtable-set! headers key value))
 
 	 (define response->string
 	   (case-lambda
