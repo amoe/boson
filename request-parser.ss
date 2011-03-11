@@ -56,7 +56,7 @@
 				"/"
 				"HTTP/1.1"
 				(make-hashtable equal-hash equal?)
-				null))
+				'()))
 
 	 (define (http-request-method self) (http-request-s-method self))
 	 (define (http-request-uri self) (http-request-s-uri self))
@@ -64,7 +64,7 @@
 	 (define (http-request-headers self) (http-request-s-headers self))
 	 (define (http-request-data self) (http-request-s-data self))
 	 (define (http-request-header self key default-value)
-	   (hash-table-get (http-request-s-headers self) key default-value))
+	   (hashtable-ref (http-request-s-headers self) key default-value))
 
 	 ;; "method uri http-version" -> self!
 	 (define (http-request-request! self line)
