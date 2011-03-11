@@ -156,8 +156,8 @@
 	 (define (make-default-conf)
 	   (let ((conf (make-hash-table)))
 	     (hash-table-put! conf 'port 80)
-	     (hash-table-put! conf 'script-ext #"ss")
-	     (hash-table-put! conf 'embedded-script-ext #"sml")
+	     (hash-table-put! conf 'script-ext "ss")
+	     (hash-table-put! conf 'embedded-script-ext "sml")
 	     (hash-table-put! conf 'session-timeout (* 5 60)) ;; 5 minutes
 	     (hash-table-put! conf 'max-header-length (* 1024 512)) ;; 512Kb
 	     (hash-table-put! conf 'max-body-length (* 1024 5120)) ;; 5Mb
