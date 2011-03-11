@@ -25,6 +25,7 @@
 		 session-last-access)
 
 	 (import (rnrs)
+                 (util)
                  (globals)
                  (session-util))
 
