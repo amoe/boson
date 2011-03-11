@@ -58,7 +58,7 @@
          (define (parse-sml sml-doc state)
            (let ((match (irregex-search *tag-regex* sml-doc)))
              (if match
-                 (let ((script (irregex-match-substring match)))
+                 (let ((script (irregex-match-substring match 1)))
                    (parse-sml
                     (irregex-replace *tag-regex* sml-doc
                                      (eval-script script state))
