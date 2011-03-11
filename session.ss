@@ -79,23 +79,19 @@
 		     (hashtable-for-each
                       state-to-add 
                       (lambda (k v) (hashtable-set! state k v)))
-		     (try
-		      (cond ((not (http-share-state? state))
-			     (set! sess (session-remap sess sessions))
-			     (set! id (session-s-id sess))))
-		      (set! res-html ((list-ref procs (sub1 proc-count))
-				      (make-session-url url id proc-count) 
-				      state))
-		      (catch (lambda (ex)
-			       (cond ((procedure? ex)
-				      (set! proc-count (find-proc-index ex procs))
-				      (set! res-html 
-					    (session-execute-procedure url procs
-								       sess-id 
-								       proc-count
-								       state-to-add
-								       sessions)))
-				     (else (raise ex))))))
+                     (guard (ex
+                             ((procedure? ex)
+                              (set! proc-count (find-proc-index ex procs))
+                              (set! res-html
+                                    (session-execute-procedure
+                                     url procs sess-id proc-count state-to-add
+                                     sessions))))
+                       (when (not (http-share-state? state))
+                         (set! sess (session-remap sess sessions))
+                         (set! id (session-s-id sess)))
+                       (set! res-html ((list-ref procs (- proc-count 1))
+                                       (make-session-url url id proc-count)
+                                       state)))
 		     (if (>= proc-count procs-len)
 			 (if (not (http-keep-alive? state))
 			     (session-destroy id sessions)))
