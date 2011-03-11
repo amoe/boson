@@ -121,9 +121,9 @@
 	       (make-hashtable equal-hash equal?)))
 
 	 (define (assert-input-line in)
-	   (let ((line (read-line in 'return-linefeed)))
+	   (let ((line (get-line in)))
 	     (if (eof-object? line) 
-		 null
+		 #f
 		 line)))
 
 	 ;; As of now, we support only GET and POST.
