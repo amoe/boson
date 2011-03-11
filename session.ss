@@ -24,12 +24,18 @@
 		 session-destroy
 		 session-last-access)
 
-	 (import (globals) (session-util))
+	 (import (rnrs)
+                 (globals)
+                 (session-util))
 
-	 (define-struct session-s (id 
-				   url 
-				   state
-				   last-access))
+	 (define-record-type session-s
+           (fields id
+                   url
+                   (mutable state
+                            session-s-state set-session-s-state!)
+                   (mutable last-access
+                            session-s-last-access set-session-s-last-access!)))
+
 	 (define *session-id* 0)
 	 (define *vars-sep* "?")
 
