@@ -18,9 +18,9 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library mime-types
-	 
+(library (mime-types)
 	 (export find-mime-type)
+         (import)
 	 
 	 (define mime-types (list 
 			     (cons #"html" "text/html")
