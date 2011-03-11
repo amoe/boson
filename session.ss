@@ -54,7 +54,7 @@
 	     sess))
 
 	 (define (session-destroy id sessions)
-	   (hash-table-remove! sessions id))
+	   (hashtable-delete! sessions id))
 	 
 	 (define (session-remap sess sessions)
 	   (let ((new-sess (find-session -1 (session-s-url sess)
