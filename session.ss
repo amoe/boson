@@ -73,7 +73,7 @@
 	       (let* ((sess (find-session sess-id url sessions))
 		      (id (session-s-id sess))
 		      (procs-len (length procs)))
-		 (let ((proc-count (add1 p-count)))
+		 (let ((proc-count (+ p-count 1)))
 		   (let ((state (session-s-state sess)) 
 			 (res-html null))
 		     (hash-table-map state-to-add 
@@ -107,7 +107,7 @@
 		      (cond ((eq? proc (car plist))
 			     (set! ret i)
 			     (loop null i))
-			    (else (loop (cdr plist) (add1 i)))))))
+			    (else (loop (cdr plist) (+ i 1)))))))
 	     ret))
 
 	 (define (next-session-id)
@@ -142,7 +142,7 @@
 	 (define (normalize-url url)
 	   (let ((idx (string-rfind url "/")))
 	     (if (= idx -1) url
-		 (substring url (add1 idx)))))
+		 (substring url (+ idx 1)))))
 
 	 (define (remove-vars url)
 	   (let ((idx (string-find url *vars-sep*)))
