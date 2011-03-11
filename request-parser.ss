@@ -73,7 +73,7 @@
 	   (let ((tokens (string-split line #\space)))
 	     (if (not (= (length tokens) 3))
 		 (raise (make-http-parser-error "Invalid HTTP request.")))
-	     (let ((index 0) (uri null))
+	     (let ((index 0) (uri #f))
 	       (for token in tokens
 		    (cond
 		     ((= index 0)
