@@ -75,7 +75,7 @@
 		      (procs-len (length procs)))
 		 (let ((proc-count (+ p-count 1)))
 		   (let ((state (session-s-state sess)) 
-			 (res-html null))
+			 (res-html #f))
 		     (hash-table-map state-to-add 
 				     (lambda (k v) (hashtable-set! state k v)))
 		     (try
@@ -101,27 +101,23 @@
 		     res-html)))))
 
 	 (define (find-proc-index proc procs-list)
-	   (let ((ret 0))
-	     (let loop ((plist procs-list) (i 0))
-	       (cond ((not (null? plist))
-		      (cond ((eq? proc (car plist))
-			     (set! ret i)
-			     (loop null i))
-			    (else (loop (cdr plist) (+ i 1)))))))
-	     ret))
+           (or 
+             (list-index (lambda (p) (eq? p proc)) procs-list)
+             0))
 
 	 (define (next-session-id)
-	   (let ((id null))
-	     (set! *session-id* (+ *session-id* 1))
-	     (set! id *session-id*)
-	     id))
+           (let ((new (+ *session-id* 1)))
+             (set! *session-id* new)
+             new))
 
 	 (define (find-session id url sessions)
-	   (let ((sess (hash-table-get sessions id null)))
-	     (if (null? sess) (set! sess (session-create url sessions)))
-	     (if (null? sess) (raise "Invalid session")
+	   (let ((sess (hashtable-get sessions id #f)))
+	     (when (not sess)
+               (set! sess (session-create url sessions)))
+	     (if (not sess)
+                 (raise "Invalid session")
 		 (set-session-s-last-access! sess (current-seconds)))
-	     sess))		       
+	     sess))
 
 	 (define (make-session-url url sess-id proc-count)
 	   (let ((out (open-output-string)))
