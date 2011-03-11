@@ -118,12 +118,13 @@
 	     sess))
 
 	 (define (make-session-url url sess-id proc-count)
-	   (let ((out (open-output-string)))
-	     ;; TODO: need to find a way to recycle old sessions-ids.
-	     (set! url (normalize-url url))
-	     (fprintf out "~a~a.~a~a.ss" 
-		      *sess-id-sep* sess-id proc-count *sess-id-sep*)
-	     (string-append url (get-output-string out))))
+           (let ((norm (normalize-url url)))
+             (string-append
+              norm
+              (call-with-string-output-port
+               (lambda (out)
+                 (fprintf out "~a~a.~a~a.ss" 
+                          *sess-id-sep* sess-id proc-count *sess-id-sep*))))))
 
 	 (define (find-session-id url)
 	   (let ((idx (string-find url *sess-id-sep*)))
