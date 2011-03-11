@@ -55,7 +55,7 @@
 	   (make-http-request-s 'GET 
 				"/"
 				"HTTP/1.1"
-				(make-hash-table 'equal)
+				(make-hashtable equal-hash equal?)
 				null))
 
 	 (define (http-request-method self) (http-request-s-method self))
@@ -111,7 +111,7 @@
 	 (define (parse-request-data req)
 	   (if (not (null? req))	       
 	       (let ((key-values (string-split req '(#\&)))
-		     (ret (make-hash-table 'equal)))
+		     (ret (make-hashtable equal-hash equal?)))
 		 (let loop ((kw key-values))
 		   (if (not (null? kw))
 		       (let* ((split (string-split (car kw) '(#\=)))
@@ -120,7 +120,7 @@
 			 (hash-table-put! ret key value)
 			 (loop (cdr kw)))))
 		 ret)
-	       (make-hash-table 'equal)))
+	       (make-hashtable equal-hash equal?)))
 
 	 (define (assert-input-line in)
 	   (let ((line (read-line in 'return-linefeed)))
