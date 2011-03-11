@@ -28,6 +28,7 @@
                  (util)
                  (globals)
                  (session-util)
+                 (compat)
                  (only (srfi :1) list-index))
 
 	 (define-record-type session-s
