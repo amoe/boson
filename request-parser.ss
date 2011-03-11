@@ -91,7 +91,7 @@
 	     (if idx
 		 (let ((key (substring line 0 idx))
 		       (value (string-trim-both (substring line (+ idx 1)))))
-		   (hash-table-put! (http-request-s-headers self) 
+		   (hashtable-set! (http-request-s-headers self) 
 				    (string-downcase key) value))
 		 (raise (make-http-parser-error "Invalid header.")))))
 
@@ -115,7 +115,7 @@
 		       (let* ((split (string-split (car kw) #\=))
 			      (key (url-decode (car split)))
 			      (value (url-decode (car (cdr split)))))
-			 (hash-table-put! ret key value)
+			 (hashtable-set! ret key value)
 			 (loop (cdr kw)))))
 		 ret)
 	       (make-hashtable equal-hash equal?)))
