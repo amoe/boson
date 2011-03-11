@@ -21,14 +21,7 @@
 ;; TODO:
 ;;  * Test hooks.
 
-(library web-server
-
-	 (import (net)
-		 ((prefix parser:: http-request-parser))
-		 ((prefix loader:: http-resource-loader))
-		 ((prefix response:: http-response))
-		 ((prefix session:: http-session)))
-
+(library (web-server)
 	 (export web-server
 		 web-server-start
 		 web-server-stop
@@ -37,6 +30,13 @@
 		 web-server-configuration!
 		 web-server-hook!
 		 write-log)		 
+
+	 (import (net)
+		 ((prefix parser:: http-request-parser))
+		 ((prefix loader:: http-resource-loader))
+		 ((prefix response:: http-response))
+		 ((prefix session:: http-session)))
+
 
 	 (define-struct web-server-s (configuration
 				      resource-loader
