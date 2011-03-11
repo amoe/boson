@@ -30,11 +30,17 @@
 		 response-header-value
 		 response-header-value!
 		 response->string)
-         (import)
+         (import (rnrs))
 	 
-	 (define-struct response-s (status-line
-				    headers
-				    body))
+	 (define-record-type response-s
+           (fields
+            (mutable status-line
+                     response-s-status-line set-response-s-status-line!)
+            (mutable headers
+                     response-s-headers set-response-s-headers!)
+            (mutable body
+                     response-s-body set-response-s-body!)))
+         
 	 (define crlf "\r\n")
 
 	 (define (make-response version 
