@@ -18,8 +18,7 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-response
-	 
+(library (response)
 	 (export make-response 
 		 make-error-response
 		 response-status-line
@@ -31,6 +30,7 @@
 		 response-header-value
 		 response-header-value!
 		 response->string)
+         (import)
 	 
 	 (define-struct response-s (status-line
 				    headers
