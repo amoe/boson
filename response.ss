@@ -30,7 +30,8 @@
 		 response-header-value
 		 response-header-value!
 		 response->string)
-         (import (rnrs))
+         (import (rnrs)
+                 (compat))
 	 
 	 (define-record-type response-s
            (fields
