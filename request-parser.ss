@@ -35,15 +35,21 @@
 		 http-parser-error?
 		 http-parser-error-message)
 
-	 (import (url-encode))
+	 (import (rnrs) (url-encode))
 
-	 (define-struct http-request-s (method 
-					uri 
-					version 
-					headers 
-					data))
+	 (define-record-type http-request-s
+           (fields
+             (mutable method 
+                      http-request-s-method set-http-request-s-method!)
+             (mutable uri
+                      http-request-s-uri set-http-request-s-uri!)
+             (mutable version
+                      http-request-s-version set-http-request-s-version!)
+             headers
+             (mutable data
+                      http-request-s-data set-http-request-s-data!)))
 
-	 (define-struct http-parser-error (message))
+	 (define-record-type http-parser-error (fields message))
 
 	 (define (http-request)
 	   (make-http-request-s 'GET 
