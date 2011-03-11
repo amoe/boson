@@ -18,7 +18,7 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-session
+(library (session)
 	 
 	 (export session-execute-procedure
 		 session-destroy
