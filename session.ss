@@ -50,7 +50,7 @@
 					(make-default-session-state sess-id)
 					(current-seconds)))
 		  (state (make-default-session-state sess-id)))
-	     (hash-table-put! sessions sess-id sess)
+	     (hashtable-set! sessions sess-id sess)
 	     sess))
 
 	 (define (session-destroy id sessions)
@@ -77,7 +77,7 @@
 		   (let ((state (session-s-state sess)) 
 			 (res-html null))
 		     (hash-table-map state-to-add 
-				     (lambda (k v) (hash-table-put! state k v)))
+				     (lambda (k v) (hashtable-set! state k v)))
 		     (try
 		      (cond ((not (http-share-state? state))
 			     (set! sess (session-remap sess sessions))
