@@ -36,6 +36,8 @@
 		 http-parser-error-message)
 
 	 (import (rnrs)
+                 (compat)
+                 (util)
                  (url-encode)
                  (spells string-utils)
                  (only (srfi :13) string-index
@@ -140,8 +142,9 @@
 		      (http-request-s-method self)
 		      (http-request-s-uri self)	     
 		      (http-request-s-version self))
-	     (hash-table-map (http-request-s-headers self)
-			     (lambda (k v) (fprintf out "~a: ~a~n" k v)))
+	     (hashtable-for-each
+              (http-request-s-headers self)
+              (lambda (k v) (fprintf out "~a: ~a~n" k v)))
 	     (fprintf out "~n")
 	     (if (not (null? (http-request-s-data self)))
 		 (fprintf out "~a" (http-request-s-data self))))))
