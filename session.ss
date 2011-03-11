@@ -24,7 +24,7 @@
 		 session-destroy
 		 session-last-access)
 
-	 (import (http-globals) (http-session-util))
+	 (import (globals) (session-util))
 
 	 (define-struct session-s (id 
 				   url 
