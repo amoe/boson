@@ -109,7 +109,7 @@
              new))
 
 	 (define (find-session id url sessions)
-	   (let ((sess (hashtable-get sessions id #f)))
+	   (let ((sess (hashtable-ref sessions id #f)))
 	     (when (not sess)
                (set! sess (session-create url sessions)))
 	     (if (not sess)
