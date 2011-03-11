@@ -20,7 +20,8 @@
 
 (library (mime-types)
 	 (export find-mime-type)
-         (import (rnrs))
+         (import (rnrs)
+                 (compat))
 	 
 	 (define mime-types (list 
 			     (cons "html" "text/html")
