@@ -30,7 +30,7 @@
                  (session-util)
                  (compat)
                  (only (srfi :1) list-index)
-                 (only (srfi :13) string-index))
+                 (only (srfi :13) string-index string-index-right))
 
 	 (define-record-type session-s
            (fields id
@@ -134,14 +134,14 @@
                  -1
 		 (let ((end-idx (string-index url *sess-id-sep* (+ idx 1))))
 		   (if (and end-idx (> end-idx 0))
-		       ;(string->number (substring url (+ idx 1) end-idx))
 		       (substring url (+ idx 1) end-idx)
 		       -1)))))
 
 	 (define (normalize-url url)
-	   (let ((idx (string-rfind url "/")))
-	     (if (= idx -1) url
-		 (substring url (+ idx 1)))))
+	   (let ((idx (string-index-right url "/")))
+             (if idx
+                 (substring url (+ idx 1))
+                 url)))
 
 	 (define (remove-vars url)
 	   (let ((idx (string-find url *vars-sep*)))
