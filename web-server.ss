@@ -77,7 +77,7 @@
 	     (let ((self (make-web-server-s (make-default-conf)
 					    (loader::resource-loader)
 					    (make-hashtable equal-hash equal?)
-					    null null
+					    #f #f
 					    log-port)))		  
                (let loop ((conf conf))
                  (when (not (null? conf))
@@ -141,17 +141,17 @@
 	 (define (web-server-hook! self hook-name
 				   hook-proc)
 	   (let ((hooks (web-server-s-hooks self)))
-	     (cond ((null? hooks) 
-		    (set! hooks (make-eq-hashtable))
-		    (set-web-server-s-hooks! self hooks)))
-	     (hashtable-set! hooks hook-name hook-proc)))
+             (when (not hooks)
+               (set! hooks (make-eq-hashtable))
+               (set-web-server-s-hooks! self hooks))
+             (hashtable-set! hooks hook-name hook-proc)))
 
 	 (define (web-server-socket self)
 	   (web-server-s-server-socket self))
 
 	 (define (web-server-configuration self conf-key)
 	   (hashtable-ref (web-server-s-configuration self) 
-			   conf-key null))
+			   conf-key #f))
 
 	 (define (web-server-configuration! self 
 					    conf-key
@@ -188,7 +188,7 @@
  					error
  					(address->string 
  					 (connection-address client-conn))))
-		       (let ((str null))
+		       (let ((str #f))
 			 (cond
 			   ((string? error) (set! str error))
 			   ((parser::http-parser-error? error)
@@ -296,9 +296,9 @@
 	   (let ((hooks (web-server-s-hooks self))
 		 (ret #t))
 	     (if (not (null? hooks))
-		 (let ((hook-proc (hashtable-ref hooks hook-name null)))
-		   (if (not (null? hook-proc))
-		       (set! ret (apply hook-proc (cons self hook-args))))))
+		 (let ((hook-proc (hashtable-ref hooks hook-name #f)))
+		   (when hook-proc
+                     (set! ret (apply hook-proc (cons self hook-args))))))
 	     ret))
 
 	 (define (sessions-gc-check self curr-secs
