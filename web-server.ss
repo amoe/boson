@@ -34,6 +34,7 @@
 	 (import (rnrs)
                  (util)
                  (compat)
+                 (only (srfi :13) string-trim-both)
                  (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
@@ -187,7 +188,7 @@
               (lambda ()
                 (let* ((http-request (read-header conf client-socket))
                        (body-str (read-body conf client-socket http-request)))
-                  (if (> (string-length (string-trim body-str)) 0)
+                  (if (> (string-length (string-trim-both body-str)) 0)
                       (parser::http-request-data! http-request body-str))
                   (handle-request self 
                                   client-socket
@@ -251,15 +252,12 @@
 			       client-conn
 			       error-message
 			       conf)
-	   (try
-	    (send-response self client-conn
-			   (response::make-error-response
-			    error-message
-			    500 
-			    *HTTP-VERSION*))
-	    (catch (lambda (error)
-		     (write-log self
-				'("(return-error): ~a." error))))))
+	   (guard (ex (#t (write-log self '("(return-error): ~a.") error)))
+             (send-response self client-conn
+                            (response::make-error-response
+                             error-message
+                             500 
+                             *HTTP-VERSION*))))
 	 
 	 (define (send-response self client-conn resp)
 	   (cond ((invoke-hook self 'before-send-response
