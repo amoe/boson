@@ -298,6 +298,8 @@
 		(if (> (- curr-secs (session::session-last-access session))
 		       session-timeout-secs)		    
 		    (set! gc-session-ids (cons id gc-session-ids)))))
-	     (for id in gc-session-ids
-		  (session::session-destroy id sessions)))))
+             (for-each (lambda (id) (session::session-destroy id sessions))
+                       gc-session-ids)))
+
+)
 	       
