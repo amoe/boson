@@ -213,7 +213,9 @@
 	   (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
 		 (http-request (parser::http-request))
 		 (request-parsed #f)
-                 (client-port (mosh:socket-port client-socket)))
+                 (client-port (transcoded-port
+                               (mosh:socket-port client-socket)
+                               (native-transcoder))))
              (let loop ((line (get-line client-port))
                         (running-header-length 0))
                (cond
