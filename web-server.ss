@@ -35,7 +35,7 @@
 	 (import (rnrs)
                  (util)
                  (compat)
-                 (only (srfi :13) string-trim-both)
+                 (only (srfi :13) string-trim-both string-null?)
                  (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
@@ -57,6 +57,11 @@
                    log-port))
 
 	 (define *HTTP-VERSION* "HTTP/1.0")
+
+         (define (debug msg)
+           (display msg)
+           (newline)
+           (flush-output-port (current-output-port)))
 
 	 ;; (list) -> web-server
 	 ;; Creates a new web-server object. The list argument
@@ -122,19 +127,23 @@
 							session-timeout-secs)))
 			   (set! last-check-secs cs)))))))
                (let loop ()
+                 (debug "Inside listen loop")
                  (when (condition-check-proc)
+                    (debug "Checked condition")
                     (let ((conn (mosh:socket-accept server-socket)))
-                      (mosh:spawn
+                      (debug "Accepted connection")
+                      (let ((pid (mosh:spawn
                          (lambda (args)
                            (apply on-client-connect args))
                          (list self conn)
                          '((rnrs)
                            (mosh concurrent)
                            (web-server)
-                           (util)))
+                           (util)))))
+                        (mosh:join! pid)
                       ;(thread (lambda () (on-client-connect self conn)))
                       (sess-check-proc)
-                      (loop))))))))
+                      (loop)))))))))
 
 	 (define (web-server-stop self)
 	   (mosh:socket-close (web-server-s-server-socket self)))
@@ -182,6 +191,7 @@
 
 	 ;; Called when a new client connection is established.
 	 (define (on-client-connect self client-socket)
+           (debug "Inside client connection thread")
 	   (let ((conf (web-server-s-configuration self)))
              (with-exception-handler
               (lambda (error)
@@ -197,10 +207,14 @@
                         (else (condition-message error)))))
                 (return-error self client-socket str conf)))
               (lambda ()
+                (debug "Reading request")
                 (let* ((http-request (read-header conf client-socket))
+                       (x (debug "Read request, reading body"))
                        (body-str (read-body conf client-socket http-request)))
+                  (debug "Read both request and body")
                   (if (> (string-length (string-trim-both body-str)) 0)
                       (parser::http-request-data! http-request body-str))
+                  (debug "Handling request")
                   (handle-request self 
                                   client-socket
                                   http-request))))
@@ -210,24 +224,28 @@
 	      (mosh:socket-close client-socket))))
 
 	 (define (read-header conf client-socket)
+           (debug "Reading header")
 	   (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
 		 (http-request (parser::http-request))
 		 (request-parsed #f)
                  (client-port (transcoded-port
                                (mosh:socket-port client-socket)
                                (native-transcoder))))
+             (debug "About to get line")
              (let loop ((line (get-line client-port))
                         (running-header-length 0))
                (cond
-                 ((eof-object? line) #f)
+                 ((or (string-null? line) (eof-object? line)) #f)
                  ((> running-header-length max-header-length)
                    (raise "Header content is too long."))
                  (else
+                  (debug (string-append "Received a line: " line))
                   (when (not request-parsed)
                     (parser::http-request-request! http-request line)
                     (set! request-parsed #t))
                   (loop (get-line client-port)
                         (+ running-header-length (string-length line))))))
+             (debug "Returning")
              http-request))
 
 	 (define (read-body conf client-socket http-request)
@@ -276,9 +294,9 @@
 	   (cond ((invoke-hook self 'before-send-response
 			       (list client-conn resp))
 		  (mosh:socket-send client-conn
-			       (response::response->string resp))
+			       (string->utf8 (response::response->string resp)))
 		  (mosh:socket-send client-conn
-			       (response::response-body resp)))))
+			       (string->utf8 (response::response-body resp))))))
 
 	 (define (write-log self entries)
 	   (if (not (list? entries))
