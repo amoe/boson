@@ -29,7 +29,8 @@
 		 web-server-configuration
 		 web-server-configuration!
 		 web-server-hook!
-		 write-log)		 
+		 write-log
+                 on-client-connect)		 
 
 	 (import (rnrs)
                  (util)
@@ -39,9 +40,11 @@
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
                  (prefix (session) session::)
-                 (prefix (mosh socket) mosh:))
+                 (prefix (mosh socket) mosh:)
+                 (prefix (mosh concurrent) mosh:))
 
 	 (define-record-type web-server-s
+           (nongenerative)   ; placate mosh
            (fields configuration
                    resource-loader
                    sessions
@@ -121,7 +124,15 @@
                (let loop ()
                  (when (condition-check-proc)
                     (let ((conn (mosh:socket-accept server-socket)))
-                      (thread (lambda () (on-client-connect self conn)))
+                      (mosh:spawn
+                         (lambda (args)
+                           (apply on-client-connect args))
+                         (list self conn)
+                         '((rnrs)
+                           (mosh concurrent)
+                           (web-server)
+                           (util)))
+                      ;(thread (lambda () (on-client-connect self conn)))
                       (sess-check-proc)
                       (loop))))))))
 
