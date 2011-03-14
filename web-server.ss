@@ -32,6 +32,7 @@
 		 write-log)		 
 
 	 (import (rnrs)
+                 (util)
                  (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
