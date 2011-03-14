@@ -292,7 +292,7 @@
 	 (define (invoke-hook self hook-name hook-args)
 	   (let ((hooks (web-server-s-hooks self))
 		 (ret #t))
-	     (if (not (null? hooks))
+	     (if hooks
 		 (let ((hook-proc (hashtable-ref hooks hook-name #f)))
 		   (when hook-proc
                      (set! ret (apply hook-proc (cons self hook-args))))))
