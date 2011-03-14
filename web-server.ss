@@ -271,15 +271,13 @@
 	   (if (not (list? entries))
 	       (set! entries (list entries)))
 	   (let ((port (web-server-s-log-port self)))
-	     (if (not (null? port))
-		 (let ((f (list fprintf port)))
-                   (for-each
-                    (lambda (e)
-                      (set! f (append f (list e))))
-                    entries)
-		   (eval f)
-		   (fprintf port "~n")
-		   (flush-output port)))))
+	     (when (not (null? port))
+                 (for-each
+                  (lambda (e)
+                    (apply fprintf (cons port e)))
+                  entries)
+                 (newline port)
+                 (flush-output-port port))))
 
 	 (define (invoke-hook self hook-name hook-args)
 	   (let ((hooks (web-server-s-hooks self))
