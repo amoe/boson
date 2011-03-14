@@ -27,17 +27,21 @@
 		 resource-content-length
 		 resource-content-last-modified)
 
-	 (import (session) 
+	 (import (rnrs)
+                 (session) 
 		 (request-parser)
 		 (globals)
 		 (sml-parser)
 		 (mime-types))
 
-	 (define-struct resource-loader-s (script-cache sml-cache))
-	 (define-struct resource-s (content 
-				    content-type
-				    content-length
-				    content-last-modified))
+	 (define-record-type resource-loader-s
+           (fields script-cache
+                   sml-cache))
+	 (define-record-type resource-s
+           (fields content 
+                   content-type
+                   content-length
+                   content-last-modified))
 
 	 (define (resource-loader)
 	   (make-resource-loader-s (make-hash-table 'equal)
