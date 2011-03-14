@@ -31,18 +31,23 @@
 		 web-server-hook!
 		 write-log)		 
 
-	 (import (prefix (request-parser) parser::)
+	 (import (rnrs)
+                 (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
                  (prefix (session) session::))
 
-
-	 (define-struct web-server-s (configuration
-				      resource-loader
-				      sessions
-				      server-socket
-				      hooks
-				      log-port))
+	 (define-record-type web-server-s
+           (fields configuration
+                   resource-loader
+                   sessions
+                   (mutable server-socket
+                            web-server-s-server-socket
+                            set-web-server-s-server-socket!)
+                   (mutable hooks
+                            web-server-s-hooks
+                            set-web-server-s-hooks!)
+                   log-port))
 
 	 (define *HTTP-VERSION* "HTTP/1.0")
 
