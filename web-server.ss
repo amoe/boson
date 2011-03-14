@@ -171,35 +171,31 @@
 	 ;; Called when a new client connection is established.
 	 (define (on-client-connect self client-socket)
 	   (let ((conf (web-server-s-configuration self)))
-	     (try
-	      (let* ((http-request (read-header conf client-socket))
-		     (body-str (read-body conf client-socket http-request)))
-		(if (> (string-length (string-trim body-str)) 0)
-		    (parser::http-request-data! http-request body-str))
-		(handle-request self 
-				client-conn
-				http-request))
-	      (catch (lambda (error)
- 		       (write-log self
- 				  (list "Error: ~a in connection ~a."
- 					error
-                                        client-conn))
-		       (let ((str #f))
-			 (cond
-			   ((string? error) (set! str error))
-			   ((parser::http-parser-error? error)
-			    (set! str (parser::http-parser-error-message error)))
-			   (else (set! str (exn-message error))))
-			 (return-error self
-				       client-conn
-				       str
-				       conf)))))
-	     (try
-	      (mosh:socket-close client-socket)
-	      (catch (lambda (error)
-		       (write-log self
-				  '("Error: (socket-close): ~a."
-				    error)))))))
+             (with-exception-handler
+              (lambda (error)
+                (write-log self
+                           (list "Error: ~a in connection ~a."
+                                 error
+                                 client-socket))
+                (let ((str
+                       (cond
+                        ((string? error) error)
+                        ((parser::http-parser-error? error)
+                         (parser::http-parser-error-message error))
+                        (else (condition-message error)))))
+                (return-error self client-socket str conf)))
+              (lambda ()
+                (let* ((http-request (read-header conf client-socket))
+                       (body-str (read-body conf client-socket http-request)))
+                  (if (> (string-length (string-trim body-str)) 0)
+                      (parser::http-request-data! http-request body-str))
+                  (handle-request self 
+                                  client-socket
+                                  http-request))))
+	     (guard (error (#t (write-log self
+                                          '("Error: (socket-close): ~a.")
+                                          error)))
+	      (mosh:socket-close client-socket))))
 
 	 (define (read-header conf client-socket)
 	   (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
