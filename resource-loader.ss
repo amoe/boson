@@ -44,8 +44,8 @@
                    content-last-modified))
 
 	 (define (resource-loader)
-	   (make-resource-loader-s (make-hash-table 'equal)
-				   (make-hash-table 'equal)))
+	   (make-resource-loader-s (make-hashtable equal-hash equal?)
+				   (make-hashtable equal-hash equal?)))
 
 	 ;; Returns an instance of resource-s
 	 (define (resource-loader-load self web-server-conf
@@ -105,28 +105,28 @@
 	      (read-fresh-file uri web-server-conf 'bytes))
 	     ((script) 
 	      (let ((cache 
-		     (hash-table-get (resource-loader-s-script-cache self)
+		     (hashtable-ref (resource-loader-s-script-cache self)
 				     uri null)))
 		(if (not (null? cache)) 
 		    (values 0 cache)
 		    (values 0 (read-fresh-script self uri)))))))
 
 	 (define (read-sml self uri web-server-conf)
-	   (let ((cache (hash-table-get (resource-loader-s-sml-cache self)
+	   (let ((cache (hashtable-ref (resource-loader-s-sml-cache self)
 					uri null)))
 	     (cond ((not (null? cache))
 		    (values (car cache) (cdr cache)))
 		   (else
 		    (let-values (((sz content) 
 				  (read-fresh-file uri web-server-conf 'string)))
-				(hash-table-put! (resource-loader-s-sml-cache self)
+				(hashtable-set! (resource-loader-s-sml-cache self)
 						 uri
 						 (cons sz content))
 				(values sz content))))))
 	 
 	 (define (read-fresh-file uri web-server-conf mode)	   
 	   (let ((sz (file-size uri)))		 
-	     (if (> sz (hash-table-get web-server-conf 'max-response-size))
+	     (if (> sz (hashtable-ref web-server-conf 'max-response-size #f))
 		 (raise "Response will exceed maximum limit."))
 	     (let ((file null) (err null) (data null))
 	       (try
@@ -141,7 +141,7 @@
 	 
 	 (define (read-fresh-script self uri)
 	   (let ((ret (load uri)))
-	     (hash-table-put! (resource-loader-s-script-cache self)
+	     (hashtable-set! (resource-loader-s-script-cache self)
 			      uri ret)
 	     ret))
 
@@ -164,12 +164,12 @@
 
 	 (define (script-ext conf)
 	   (if (null? *ss-script-ext*)
-	       (set! *ss-script-ext* (hash-table-get conf 'script-ext)))
+	       (set! *ss-script-ext* (hashtable-ref conf 'script-ext #f)))
 	   *ss-script-ext*)
 
 	 (define (embedded-script-ext conf)
 	   (if (null? *embedded-script-ext*)
-	       (set! *embedded-script-ext* (hash-table-get conf 'embedded-script-ext)))
+	       (set! *embedded-script-ext* (hashtable-ref conf 'embedded-script-ext #f)))
 	   *embedded-script-ext*)
 
 	 (define (parse-uri uri)
