@@ -2,14 +2,21 @@
 ; implementation.
 
 (library (util)
-  (export char-symbolic?
+  (export fprintf
+          char-symbolic?
           char-punctuation?
           current-seconds
           hashtable-for-each
           load)
   (import (rnrs)
           (rnrs eval)
-          (prefix (srfi :19) srfi-19:))
+          (prefix (srfi :19) srfi-19:)
+          (srfi :48))
+  
+
+  (define (fprintf output-port format-string . rest)
+    (display (apply format (cons format-string rest))
+             output-port))
 
   ; returns #t if char's Unicode general category is Sm, Sc, Sk, or So, #f
   ; otherwise.

@@ -2,8 +2,7 @@
 ; respective R6RS cross-implementation libraries.
 
 (library (compat)
-  (export fprintf
-          filename-extension
+  (export filename-extension
           file-or-directory-modify-seconds
           file-size-in-bytes
           thread)
@@ -12,7 +11,6 @@
           (prefix (mosh file) mosh:)
           (prefix (mosh concurrent) mosh:))
 
-  (define (fprintf . args) (raise 'unimplemented))
 
   ; trimmed down version of the one from file.ss
   ;; name can be any string; we just look for a dot

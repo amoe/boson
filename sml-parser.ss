@@ -25,6 +25,7 @@
          (import (rnrs)
                  (rnrs eval)
                  (compat)
+                 (util)
                  (wak irregex))
 
 	 (define (execute-embedded-script sml-doc http-data)
