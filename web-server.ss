@@ -79,11 +79,13 @@
 					    (make-hashtable equal-hash equal?)
 					    null null
 					    log-port)))		  
-	       (while (not (null? conf))
-		      (web-server-configuration! self
-						 (car conf)
-						 (cadr conf))
-		      (set! conf (cddr conf)))
+               (let loop ((conf conf))
+                 (when (not (null? conf))
+                   (web-server-configuration! self
+                                              (car conf)
+                                              (cadr conf))
+                   (loop (cddr conf))))
+
 	       (let ((server-socket (socket))
 		     (addr (address)))
 		 (address-port! addr (web-server-configuration self 'port))
