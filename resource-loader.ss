@@ -34,7 +34,8 @@
 		 (request-parser)
 		 (globals)
 		 (sml-parser)
-		 (mime-types))
+		 (mime-types)
+                 (only (srfi :13) string-index))
 
 	 (define-record-type resource-loader-s
            (fields script-cache
@@ -165,27 +166,31 @@
 	   *embedded-script-ext*)
 
 	 (define (parse-uri uri)
-	   (let ((idx (string-find uri *sess-id-sep*)))
-	     (if (= idx -1) 
-		 (let ((idx (string-find uri "?")))
-		   (if (= idx -1)
-		       (list uri null)
-		       (list (substring uri 0 idx) null)))
-		 (list (substring uri 0 idx) 
-		       (find-session-info uri (add1 idx))))))
+	   (let ((idx (string-index uri *sess-id-sep*)))
+             (if (not idx)
+                 (let ((idx (string-index uri #\?)))
+                   (if (not idx)
+                       (list uri #f)
+                       (list (substring uri 0 idx #f))))
+                 (list (substring uri 0 idx)
+                       (find-session-info uri (+ idx 1))))))
 
 	 (define (find-session-info uri start-idx)
-	   (let ((idx (string-find uri start-idx *sess-id-sep*)))
-	     (if (= idx -1) null
+	   (let ((idx (string-index uri *sess-id-sep* start-idx)))
+	     (if (not idx) #f
+                 
 		 (substring uri start-idx idx))))
 
 	 (define (parse-session-info sess-info)
-	   (if (null? sess-info) (list -1 0)	       
-	       (let ((idx (string-find sess-info ".")))
-		 (if (= idx -1) (list -1 0)
-		     (let ((num1 (string->number (substring sess-info 0 idx)))
-		       (num2 (string->number (substring sess-info (add1 idx)))))
-		       (list num1 num2))))))
+           (if (not sess-info)
+               (list -1 0)
+               (let ((idx (string-index sess-info #\.)))
+                 (if (not idx)
+                     (list -1 0)
+                     (let ((num1 (string->number (substring sess-info 0 idx)))
+                           (num2 (string->number (substring sess-info
+                                                            (+ idx 1)))))
+                       (list num1 num2))))))
 
 	 (define (execute-resource res uri 
 				   sess-id proc-count 
