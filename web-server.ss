@@ -105,7 +105,7 @@
 	     (let* ((server-socket (web-server-s-server-socket self))
 		    (last-check-secs (current-seconds))
 		    (session-timeout-secs (web-server-configuration 
-					   self 'session-timeout)))
+					   self 'session-timeout))
 		    (sess-check-proc
 		     (lambda ()
 		       (let ((cs (current-seconds)))
@@ -122,7 +122,7 @@
 			(thread (lambda () (on-client-connect self conn)))
 			(sess-check-proc)
 			;; Just to context switch.
-			(sleep 0))))))
+			(sleep 0)))))))
 
 	 (define (web-server-stop self)
 	   (mosh:socket-close (web-server-s-server-socket self)))
