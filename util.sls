@@ -32,7 +32,7 @@
   ; procedure proc must take two arguments: a key and its value."
   (define (hashtable-for-each hashtable proc)
     (let-values (((keys values) (hashtable-entries hashtable)))
-      (for-each proc keys values)))
+      (vector-for-each proc keys values)))
 
   (define (load file)
     (eval (cons 'let (cons '() (read-forms file)))
