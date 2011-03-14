@@ -273,8 +273,10 @@
 	   (let ((port (web-server-s-log-port self)))
 	     (if (not (null? port))
 		 (let ((f (list fprintf port)))
-		   (for e in entries 
-			(set! f (append f (list e))))
+                   (for-each
+                    (lambda (e)
+                      (set! f (append f (list e))))
+                    entries)
 		   (eval f)
 		   (fprintf port "~n")
 		   (flush-output port)))))
