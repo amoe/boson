@@ -33,6 +33,7 @@
 
 	 (import (rnrs)
                  (util)
+                 (compat)
                  (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
@@ -115,14 +116,11 @@
 			   (thread (lambda ()
 				     (sessions-gc-check self cs 
 							session-timeout-secs)))
-			   (set! last-check-secs cs)
-			   (sleep 0)))))))
+			   (set! last-check-secs cs)))))))
 	       (while (condition-check-proc)
 		      (let ((conn (mosh:socket-accept server-socket)))
 			(thread (lambda () (on-client-connect self conn)))
-			(sess-check-proc)
-			;; Just to context switch.
-			(sleep 0)))))))
+			(sess-check-proc)))))))
 
 	 (define (web-server-stop self)
 	   (mosh:socket-close (web-server-s-server-socket self)))

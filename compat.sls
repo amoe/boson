@@ -5,10 +5,12 @@
   (export fprintf
           filename-extension
           file-or-directory-modify-seconds
-          file-size-in-bytes)
+          file-size-in-bytes
+          thread)
   (import (rnrs)
           (irregex)
-          (prefix (mosh file) mosh:))
+          (prefix (mosh file) mosh:)
+          (prefix (mosh concurrent) mosh:))
 
   (define (fprintf . args) (raise 'unimplemented))
 
@@ -28,4 +30,9 @@
   (define (file-size-in-bytes pathname)
     (mosh:file-size-in-bytes pathname))
 
+  ; NB: Inside the first argument of the macro SPAWN we have no access to
+  ; variables in the current namespace, so we can't use a closure - we must
+  ; pass the thunk in as an argument.
+  (define (thread thunk)
+    (mosh:spawn (lambda (p) (p)) thunk '((rnrs) (mosh concurrent))))
 )
