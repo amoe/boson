@@ -146,10 +146,10 @@
 
 	 (define (find-res-type uri conf)
 	   (let ((ext (filename-extension uri)))
-	     (if (bytes? ext)
-		 (cond ((bytes=? ext (script-ext conf)) 'script)
-		       ((bytes=? ext (embedded-script-ext conf)) 'embedded-script)
-		       (else 'file)))))
+             (cond
+              ((string=? ext (script-ext conf)) 'script)
+              ((string=? ext (embedded-script-ext conf)) 'embedded-script)
+              (else 'file))))
 
 	 (define *ss-script-ext* null)
 	 (define *embedded-script-ext* null)
