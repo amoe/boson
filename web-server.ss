@@ -76,7 +76,7 @@
 	    ((conf log-port)
 	     (let ((self (make-web-server-s (make-default-conf)
 					    (loader::resource-loader)
-					    (make-hash-table 'equal)
+					    (make-hashtable equal-hash equal?)
 					    null null
 					    log-port)))		  
 	       (while (not (null? conf))
@@ -140,32 +140,32 @@
 				   hook-proc)
 	   (let ((hooks (web-server-s-hooks self)))
 	     (cond ((null? hooks) 
-		    (set! hooks (make-hash-table))
+		    (set! hooks (make-eq-hashtable))
 		    (set-web-server-s-hooks! self hooks)))
-	     (hash-table-put! hooks hook-name hook-proc)))
+	     (hashtable-set! hooks hook-name hook-proc)))
 
 	 (define (web-server-socket self)
 	   (web-server-s-server-socket self))
 
 	 (define (web-server-configuration self conf-key)
-	   (hash-table-get (web-server-s-configuration self) 
+	   (hashtable-ref (web-server-s-configuration self) 
 			   conf-key null))
 
 	 (define (web-server-configuration! self 
 					    conf-key
 					    conf-value)
 	   (let ((conf (web-server-s-configuration self)))
-	     (hash-table-put! conf conf-key conf-value)))
+	     (hashtable-set! conf conf-key conf-value)))
 	 
 	 (define (make-default-conf)
-	   (let ((conf (make-hash-table)))
-	     (hash-table-put! conf 'port 80)
-	     (hash-table-put! conf 'script-ext "ss")
-	     (hash-table-put! conf 'embedded-script-ext "sml")
-	     (hash-table-put! conf 'session-timeout (* 5 60)) ;; 5 minutes
-	     (hash-table-put! conf 'max-header-length (* 1024 512)) ;; 512Kb
-	     (hash-table-put! conf 'max-body-length (* 1024 5120)) ;; 5Mb
-	     (hash-table-put! conf 'max-response-size (* 1024 5120)) ;; 5Mb
+	   (let ((conf (make-eq-hashtable)))
+	     (hashtable-set! conf 'port 80)
+	     (hashtable-set! conf 'script-ext "ss")
+	     (hashtable-set! conf 'embedded-script-ext "sml")
+	     (hashtable-set! conf 'session-timeout (* 5 60)) ;; 5 minutes
+	     (hashtable-set! conf 'max-header-length (* 1024 512)) ;; 512Kb
+	     (hashtable-set! conf 'max-body-length (* 1024 5120)) ;; 5Mb
+	     (hashtable-set! conf 'max-response-size (* 1024 5120)) ;; 5Mb
 	     conf))
 
 	 ;; Called when a new client connection is established.
@@ -204,7 +204,7 @@
 				    error)))))))
 
 	 (define (read-header conf client-socket)
-	   (let ((max-header-length (hash-table-get conf 'max-header-length))
+	   (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
 		 (http-request (parser::http-request))
 		 (request-parsed #f))
 	     (let loop ((line (socket-recv-line client-socket max-header-length))
@@ -228,7 +228,7 @@
 	     http-request))
 
 	 (define (read-body conf client-socket http-request)
-	   (let ((max-body-length (hash-table-get conf 'max-body-length))
+	   (let ((max-body-length (hashtable-ref conf 'max-body-length #f))
 		 (content-length (string->number (parser::http-request-header 
 						  http-request "content-length" "0")))
 		 (content ""))
@@ -294,7 +294,7 @@
 	   (let ((hooks (web-server-s-hooks self))
 		 (ret #t))
 	     (if (not (null? hooks))
-		 (let ((hook-proc (hash-table-get hooks hook-name null)))
+		 (let ((hook-proc (hashtable-ref hooks hook-name null)))
 		   (if (not (null? hook-proc))
 		       (set! ret (apply hook-proc (cons self hook-args))))))
 	     ret))
@@ -303,7 +303,7 @@
 				    session-timeout-secs)
 	   (let ((sessions (web-server-s-sessions self))
 		 (gc-session-ids (list)))
-	     (hash-table-for-each 
+	     (hashtable-for-each 
 	      sessions
 	      (lambda (id session)
 		(if (> (- curr-secs (session::session-last-access session))
