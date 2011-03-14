@@ -21,12 +21,28 @@
 ;; NOTE: This web-server only demonstartes a new web framework. 
 ;; It is not to be used in production environments.
 
-(library http
-	 
+(library (http)
+	 (export web-server                    ; web-server.ss 
+		 web-server-start
+		 web-server-stop
+		 web-server-socket
+		 web-server-configuration
+		 web-server-configuration!
+		 web-server-hook!
+		 write-log
+
+                 find-mime-type                ; mime-types.ss
+
+                 http-value                    ; session-util.ss
+                 http-value!        
+                 http-call
+                 http-keep-alive!
+		 http-keep-alive?
+		 http-share-state!
+		 http-share-state?
+		 make-default-session-state)
+
 	 (import (web-server)
 		 (mime-types)
-		 (http-session-util))
+		 (session-util)))
 
-	 (export (all-from web-server)
-		 (all-from mime-types)
-		 (all-from http-session-util)))
