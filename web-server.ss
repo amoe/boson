@@ -35,7 +35,8 @@
                  (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
-                 (prefix (session) session::))
+                 (prefix (session) session::)
+                 (prefix (mosh socket) mosh:))
 
 	 (define-record-type web-server-s
            (fields configuration
@@ -86,12 +87,9 @@
                                               (cadr conf))
                    (loop (cddr conf))))
 
-	       (let ((server-socket (socket))
-		     (addr (address)))
-		 (address-port! addr (web-server-configuration self 'port))
-		 (socket-open server-socket)
-		 (socket-bind server-socket addr #t)
-		 (set-web-server-s-server-socket! self server-socket))
+               (let ((port (web-server-configuration! self 'port)))
+                 (set-web-server-s-server-socket!
+                  (mosh:make-server-socket port)))
 	       self))))
 
 	 ;; (web-server procedure) -> bool
@@ -106,7 +104,7 @@
 	     (let* ((server-socket (web-server-s-server-socket self))
 		    (last-check-secs (current-seconds))
 		    (session-timeout-secs (web-server-configuration 
-					   self 'session-timeout))
+					   self 'session-timeout)))
 		    (sess-check-proc
 		     (lambda ()
 		       (let ((cs (current-seconds)))
@@ -118,16 +116,15 @@
 							session-timeout-secs)))
 			   (set! last-check-secs cs)
 			   (sleep 0)))))))
-	       (socket-listen server-socket)
 	       (while (condition-check-proc)
-		      (let ((conn (socket-accept server-socket)))
+		      (let ((conn (mosh:socket-accept server-socket)))
 			(thread (lambda () (on-client-connect self conn)))
 			(sess-check-proc)
 			;; Just to context switch.
-			(sleep 0)))))))
+			(sleep 0))))))
 
 	 (define (web-server-stop self)
-	   (socket-close (web-server-s-server-socket self)))
+	   (mosh:socket-close (web-server-s-server-socket self)))
 
 	 ;; Hooks could be:
 	 ;; 'before-handle-request - (hook-proc web-server-obj 
@@ -171,9 +168,8 @@
 	     conf))
 
 	 ;; Called when a new client connection is established.
-	 (define (on-client-connect self client-conn)
-	   (let ((client-socket (connection-socket client-conn))
-		 (conf (web-server-s-configuration self)))
+	 (define (on-client-connect self client-socket)
+	   (let ((conf (web-server-s-configuration self)))
 	     (try
 	      (let* ((http-request (read-header conf client-socket))
 		     (body-str (read-body conf client-socket http-request)))
@@ -186,8 +182,7 @@
  		       (write-log self
  				  (list "Error: ~a in connection ~a."
  					error
- 					(address->string 
- 					 (connection-address client-conn))))
+                                        client-conn))
 		       (let ((str #f))
 			 (cond
 			   ((string? error) (set! str error))
@@ -199,7 +194,7 @@
 				       str
 				       conf)))))
 	     (try
-	      (socket-close client-socket)
+	      (mosh:socket-close client-socket)
 	      (catch (lambda (error)
 		       (write-log self
 				  '("Error: (socket-close): ~a."
@@ -208,26 +203,21 @@
 	 (define (read-header conf client-socket)
 	   (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
 		 (http-request (parser::http-request))
-		 (request-parsed #f))
-	     (let loop ((line (socket-recv-line client-socket max-header-length))
-			(running-header-length 0))
-	       (cond 
-		((not (null? line))
-		 (cond 
-		  ((> running-header-length max-header-length)
-		   (raise "Header content is too long."))
-		  (else
-		   (let ((line-length (string-length line)))
-		     (cond 
-		      ((> line-length 0)
-		       (if (not request-parsed)
-			   (begin
-			     (parser::http-request-request! http-request line)
-			     (set! request-parsed #t))
-			   (parser::http-request-header! http-request line))
-		       (loop (socket-recv-line client-socket max-header-length)
-			     (+ running-header-length line-length))))))))))
-	     http-request))
+		 (request-parsed #f)
+                 (client-port (mosh:socket-port client-socket)))
+             (let loop ((line (get-line client-port))
+                        (running-header-length 0))
+               (cond
+                 ((eof-object? line) #f)
+                 ((> running-header-length max-header-length)
+                   (raise "Header content is too long."))
+                 (else
+                  (when (not request-parsed)
+                    (parser::http-request-request! http-request line)
+                    (set! request-parsed #t))
+                  (loop (get-line client-port)
+                        (+ running-header-length (string-length line))))))
+             http-request))
 
 	 (define (read-body conf client-socket http-request)
 	   (let ((max-body-length (hashtable-ref conf 'max-body-length #f))
@@ -239,7 +229,9 @@
 		     (cond ((> content-length max-body-length)
 			    (raise "Content is too long."))
 			   (else
-			    (set! content (socket-recv client-socket content-length))))))
+			    (set! content
+                                  (mosh:socket-recv client-socket
+                                                    content-length))))))
 	     content))
 
 	 (define (handle-request self client-conn http-request)
@@ -275,9 +267,9 @@
 	 (define (send-response self client-conn resp)
 	   (cond ((invoke-hook self 'before-send-response
 			       (list client-conn resp))
-		  (socket-send (connection-socket client-conn) 
+		  (mosh:socket-send client-conn
 			       (response::response->string resp))
-		  (socket-send (connection-socket client-conn)
+		  (mosh:socket-send client-conn
 			       (response::response-body resp)))))
 
 	 (define (write-log self entries)
