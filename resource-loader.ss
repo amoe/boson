@@ -104,7 +104,7 @@
 	     ((embedded-script) 
 	      (read-sml self uri web-server-conf))
 	     ((file) 
-	      (read-fresh-file uri web-server-conf 'bytes))
+	      (read-fresh-file uri web-server-conf))
 	     ((script) 
 	      (let ((cache 
 		     (hashtable-ref (resource-loader-s-script-cache self)
@@ -123,21 +123,13 @@
                    (hashtable-set! (resource-loader-s-sml-cache self)
                                    uri (cons sz content))
                    (values sz content)))))
-                   
-	 (define (read-fresh-file uri web-server-conf mode)	   
-	   (let ((sz (file-size-in-bytes uri)))		 
-	     (if (> sz (hashtable-ref web-server-conf 'max-response-size #f))
-		 (raise "Response will exceed maximum limit."))
-	     (let ((file null) (err null) (data null))
-	       (try
-		(set! file (open-input-file uri))
-		(case mode
-		  ((string) (set! data (read-string sz file)))
-		  (else (set! data (read-bytes sz file))))
-		(catch (lambda (ex) (set! err ex))))
-	       (if (not (null? file)) (close-input-port file))
-	       (if (not (null? err)) (raise err))
-	       (values sz data))))
+
+         (define (read-fresh-file uri web-server-conf)
+           (let ((sz (file-size-in-bytes uri)))
+             (when (> sz (hashtable-ref web-server-conf 'max-response-size #f))
+               (raise "Response will exceed maximum limit."))
+             (values sz
+                     (call-with-input-file uri get-string-all))))
 	 
 	 (define (read-fresh-script self uri)
 	   (let ((ret (load uri)))
