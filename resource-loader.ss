@@ -125,7 +125,7 @@
                    (values sz content)))))
                    
 	 (define (read-fresh-file uri web-server-conf mode)	   
-	   (let ((sz (file-size uri)))		 
+	   (let ((sz (file-size-in-bytes uri)))		 
 	     (if (> sz (hashtable-ref web-server-conf 'max-response-size #f))
 		 (raise "Response will exceed maximum limit."))
 	     (let ((file null) (err null) (data null))

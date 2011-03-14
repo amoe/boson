@@ -4,10 +4,11 @@
 (library (compat)
   (export fprintf
           filename-extension
-          file-or-directory-modify-seconds)
+          file-or-directory-modify-seconds
+          file-size-in-bytes)
   (import (rnrs)
           (irregex)
-          (mosh file))
+          (prefix (mosh file) mosh:))
 
   (define (fprintf . args) (raise 'unimplemented))
 
@@ -22,4 +23,9 @@
   ; Long term: replace call site with use of FILE-MODIFICATION-TIME from
   ; (spells filesys).
   (define (file-or-directory-modify-seconds pathname)
-    (/ (file-stat-mtime pathname) (expt 10 9))))
+    (/ (mosh:file-stat-mtime pathname) (expt 10 9)))
+  
+  (define (file-size-in-bytes pathname)
+    (mosh:file-size-in-bytes pathname))
+
+)
