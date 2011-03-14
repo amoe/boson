@@ -31,11 +31,10 @@
 		 web-server-hook!
 		 write-log)		 
 
-	 (import (net)
-		 ((prefix parser:: http-request-parser))
-		 ((prefix loader:: http-resource-loader))
-		 ((prefix response:: http-response))
-		 ((prefix session:: http-session)))
+	 (import (prefix (request-parser) parser::)
+                 (prefix (resource-loader) loader::)
+                 (prefix (response) response::)
+                 (prefix (session) session::))
 
 
 	 (define-struct web-server-s (configuration
