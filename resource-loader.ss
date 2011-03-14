@@ -27,10 +27,10 @@
 		 resource-content-length
 		 resource-content-last-modified)
 
-	 (import (http-session) 
-		 (http-request-parser)
-		 (http-globals)
-		 (http-sml-parser)
+	 (import (session) 
+		 (request-parser)
+		 (globals)
+		 (sml-parser)
 		 (mime-types))
 
 	 (define-struct resource-loader-s (script-cache sml-cache))
