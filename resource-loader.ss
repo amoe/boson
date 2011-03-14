@@ -28,6 +28,8 @@
 		 resource-content-last-modified)
 
 	 (import (rnrs)
+                 (util)
+                 (compat)
                  (session) 
 		 (request-parser)
 		 (globals)

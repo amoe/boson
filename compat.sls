@@ -3,9 +3,11 @@
 
 (library (compat)
   (export fprintf
-          filename-extension)
+          filename-extension
+          file-or-directory-modify-seconds)
   (import (rnrs)
-          (irregex))
+          (irregex)
+          (mosh file))
 
   (define (fprintf . args) (raise 'unimplemented))
 
@@ -15,4 +17,9 @@
     (cond ((and name (irregex-search "[.]([^.]+)$" name))
            => (lambda (match)
                 (irregex-match-substring match 1)))
-          (else #f))))
+          (else #f)))
+
+  ; Long term: replace call site with use of FILE-MODIFICATION-TIME from
+  ; (spells filesys).
+  (define (file-or-directory-modify-seconds pathname)
+    (/ (file-stat-mtime pathname) (expt 10 9))))
