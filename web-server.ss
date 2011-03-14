@@ -252,7 +252,7 @@
 			       client-conn
 			       error-message
 			       conf)
-	   (guard (ex (#t (write-log self '("(return-error): ~a.") error)))
+	   (guard (ex (#t (write-log self '("(return-error): ~a." error))))
              (send-response self client-conn
                             (response::make-error-response
                              error-message
@@ -272,12 +272,9 @@
 	       (set! entries (list entries)))
 	   (let ((port (web-server-s-log-port self)))
 	     (when (not (null? port))
-                 (for-each
-                  (lambda (e)
-                    (apply fprintf (cons port e)))
-                  entries)
-                 (newline port)
-                 (flush-output-port port))))
+               (apply fprintf (cons port entries))
+               (newline port)
+               (flush-output-port port))))
 
 	 (define (invoke-hook self hook-name hook-args)
 	   (let ((hooks (web-server-s-hooks self))
