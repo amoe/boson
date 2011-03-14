@@ -36,6 +36,7 @@
                  (util)
                  (compat)
                  (only (srfi :13) string-trim-both string-null?)
+                 (spells network)
                  (prefix (request-parser) parser::)
                  (prefix (resource-loader) loader::)
                  (prefix (response) response::)
@@ -100,7 +101,8 @@
 
                (let ((port (web-server-configuration self 'port)))
                  (set-web-server-s-server-socket!
-                  self (mosh:make-server-socket (number->string port))))
+                  self
+                  (open-tcp-listener (quasiquote ((service (unquote port)))))))
 	       self))))
 
 	 ;; (web-server procedure) -> bool
@@ -130,7 +132,7 @@
                  (debug "Inside listen loop")
                  (when (condition-check-proc)
                     (debug "Checked condition")
-                    (let ((conn (mosh:socket-accept server-socket)))
+                    (let ((conn (listener-accept server-socket)))
                       (debug "Accepted connection")
                       (let ((pid (mosh:spawn
                          (lambda (args)
@@ -146,7 +148,7 @@
                       (loop)))))))))
 
 	 (define (web-server-stop self)
-	   (mosh:socket-close (web-server-s-server-socket self)))
+	   (close-listener (web-server-s-server-socket self)))
 
 	 ;; Hooks could be:
 	 ;; 'before-handle-request - (hook-proc web-server-obj 
@@ -221,7 +223,7 @@
 	     (guard (error (#t (write-log self
                                           '("Error: (socket-close): ~a.")
                                           error)))
-	      (mosh:socket-close client-socket))))
+	      (close-connection client-socket))))
 
 	 (define (read-header conf client-socket)
            (debug "Reading header")
@@ -229,7 +231,7 @@
 		 (http-request (parser::http-request))
 		 (request-parsed #f)
                  (client-port (transcoded-port
-                               (mosh:socket-port client-socket)
+                               (connection-input-port client-socket)
                                (native-transcoder))))
              (debug "About to get line")
              (let loop ((line (get-line client-port))
@@ -250,17 +252,19 @@
 
 	 (define (read-body conf client-socket http-request)
 	   (let ((max-body-length (hashtable-ref conf 'max-body-length #f))
-		 (content-length (string->number (parser::http-request-header 
-						  http-request "content-length" "0")))
-		 (content ""))
+		 (content-length (string->number
+                                  (parser::http-request-header 
+                                   http-request "content-length" "0")))
+		 (content "")
+                 (input-port (connection-input-port client-socket)))
 	     (if (number? content-length)
 		 (if (> content-length 0)
 		     (cond ((> content-length max-body-length)
 			    (raise "Content is too long."))
 			   (else
 			    (set! content
-                                  (mosh:socket-recv client-socket
-                                                    content-length))))))
+                                  (get-string-n input-port
+                                                content-length))))))
 	     content))
 
 	 (define (handle-request self client-conn http-request)
@@ -291,12 +295,16 @@
                              *HTTP-VERSION*))))
 	 
 	 (define (send-response self client-conn resp)
-	   (cond ((invoke-hook self 'before-send-response
+	   (cond
+            ((invoke-hook self 'before-send-response
 			       (list client-conn resp))
-		  (mosh:socket-send client-conn
-			       (string->utf8 (response::response->string resp)))
-		  (mosh:socket-send client-conn
-			       (string->utf8 (response::response-body resp))))))
+             (let ((output-port (connection-output-port client-conn)))
+               (put-bytevector output-port
+                               (string->utf8
+                                (response::response->string resp)))
+               (put-bytevector output-port
+                               (string->utf8
+                                (response::response-body resp)))))))
 
 	 (define (write-log self entries)
 	   (if (not (list? entries))
