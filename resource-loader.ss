@@ -18,7 +18,7 @@
 ;; information or have any questions.
 ;; (Electronic mail: vijay.the.schemer@gmail.com)
 
-(library http-resource-loader
+(library (resource-loader)
 
 	 (export resource-loader 
 		 resource-loader-load
