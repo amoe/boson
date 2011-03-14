@@ -151,16 +151,16 @@
               ((string=? ext (embedded-script-ext conf)) 'embedded-script)
               (else 'file))))
 
-	 (define *ss-script-ext* null)
-	 (define *embedded-script-ext* null)
+	 (define *ss-script-ext* #f)
+	 (define *embedded-script-ext* #f)
 
 	 (define (script-ext conf)
-	   (if (null? *ss-script-ext*)
+	   (if (not *ss-script-ext*)
 	       (set! *ss-script-ext* (hashtable-ref conf 'script-ext #f)))
 	   *ss-script-ext*)
 
 	 (define (embedded-script-ext conf)
-	   (if (null? *embedded-script-ext*)
+	   (if (not *embedded-script-ext*)
 	       (set! *embedded-script-ext* (hashtable-ref conf 'embedded-script-ext #f)))
 	   *embedded-script-ext*)
 
