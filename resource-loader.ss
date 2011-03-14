@@ -108,24 +108,22 @@
 	     ((script) 
 	      (let ((cache 
 		     (hashtable-ref (resource-loader-s-script-cache self)
-				     uri null)))
-		(if (not (null? cache)) 
+				     uri #f)))
+		(if cache
 		    (values 0 cache)
 		    (values 0 (read-fresh-script self uri)))))))
 
 	 (define (read-sml self uri web-server-conf)
 	   (let ((cache (hashtable-ref (resource-loader-s-sml-cache self)
-					uri null)))
-	     (cond ((not (null? cache))
-		    (values (car cache) (cdr cache)))
-		   (else
-		    (let-values (((sz content) 
-				  (read-fresh-file uri web-server-conf 'string)))
-				(hashtable-set! (resource-loader-s-sml-cache self)
-						 uri
-						 (cons sz content))
-				(values sz content))))))
-	 
+					uri #f)))
+             (if cache
+                 (values (car cache) (cdr cache))
+                 (let-values (((sz content)
+                               (read-fresh-script uri web-server-conf 'string)))
+                   (hashtable-set! (resource-loader-s-sml-cache self)
+                                   uri (cons sz content))
+                   (values sz content)))))
+                   
 	 (define (read-fresh-file uri web-server-conf mode)	   
 	   (let ((sz (file-size uri)))		 
 	     (if (> sz (hashtable-ref web-server-conf 'max-response-size #f))
