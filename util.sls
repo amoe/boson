@@ -5,8 +5,10 @@
   (export char-symbolic?
           char-punctuation?
           current-seconds
-          hashtable-for-each)
+          hashtable-for-each
+          load)
   (import (rnrs)
+          (rnrs eval)
           (prefix (srfi :19) srfi-19:))
 
   ; returns #t if char's Unicode general category is Sm, Sc, Sk, or So, #f
@@ -24,4 +26,17 @@
   (define (hashtable-for-each hashtable proc)
     (let-values (((keys values) (hashtable-entries hashtable)))
       (for-each proc keys values)))
+
+  (define (load file)
+    (eval (cons 'let (cons '() (read-forms file)))
+          (environment '(rnrs))))
+
+  (define (read-forms file)
+    (with-input-from-file file
+      (lambda ()
+        (let loop ()
+          (let ((form (read)))
+            (if (not (eof-object? form))
+                (cons form (loop))
+                '()))))))
 )
