@@ -90,9 +90,9 @@
                                               (cadr conf))
                    (loop (cddr conf))))
 
-               (let ((port (web-server-configuration! self 'port)))
+               (let ((port (web-server-configuration self 'port)))
                  (set-web-server-s-server-socket!
-                  (mosh:make-server-socket port)))
+                  self (mosh:make-server-socket (number->string port))))
 	       self))))
 
 	 ;; (web-server procedure) -> bool
