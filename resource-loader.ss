@@ -171,7 +171,7 @@
                  (let ((idx (string-index uri #\?)))
                    (if (not idx)
                        (list uri #f)
-                       (list (substring uri 0 idx #f))))
+                       (list (substring uri 0 idx) #f)))
                  (list (substring uri 0 idx)
                        (find-session-info uri (+ idx 1))))))
 
@@ -189,7 +189,9 @@
                      (list -1 0)
                      (let ((num1 (string->number (substring sess-info 0 idx)))
                            (num2 (string->number (substring sess-info
-                                                            (+ idx 1)))))
+                                                            (+ idx 1)
+                                                            (string-length
+                                                             sess-info)))))
                        (list num1 num2))))))
 
 	 (define (execute-resource res uri 

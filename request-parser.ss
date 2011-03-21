@@ -92,7 +92,10 @@
 	   (let ((idx (string-index line #\:)))
 	     (if idx
 		 (let ((key (substring line 0 idx))
-		       (value (string-trim-both (substring line (+ idx 1)))))
+		       (value (string-trim-both
+                               (substring line
+                                          (+ idx 1)
+                                          (string-length line)))))
 		   (hashtable-set! (http-request-s-headers self) 
 				    (string-downcase key) value))
 		 (raise (make-http-parser-error "Invalid header.")))))
@@ -105,7 +108,7 @@
 	 (define (extract-request-data url)
 	   (let ((idx (string-index url #\?)))
 	     (if idx
-		 (substring url (+ idx 1))
+		 (substring url (+ idx 1) (string-length url))
 		 #f)))
 
 	 (define (parse-request-data req)

@@ -140,7 +140,7 @@
 	 (define (normalize-url url)
 	   (let ((idx (string-index-right url "/")))
              (if idx
-                 (substring url (+ idx 1))
+                 (substring url (+ idx 1) (string-length url))
                  url)))
 
 	 (define (remove-vars url)
