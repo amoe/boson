@@ -39,7 +39,8 @@
 
 	 (define-record-type resource-loader-s
            (fields script-cache
-                   sml-cache))
+                   sml-cache)
+           (nongenerative))
 	 (define-record-type resource-s
            (fields content 
                    content-type
@@ -120,7 +121,7 @@
              (if cache
                  (values (car cache) (cdr cache))
                  (let-values (((sz content)
-                               (read-fresh-script uri web-server-conf 'string)))
+                               (read-fresh-file uri web-server-conf)))
                    (hashtable-set! (resource-loader-s-sml-cache self)
                                    uri (cons sz content))
                    (values sz content)))))

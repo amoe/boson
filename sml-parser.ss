@@ -34,7 +34,7 @@
 	 (define *token-regex*
            (string->irregex "\\$\\S[^)(\\[\\]<>|\\\\\"' ]+"))
 	 (define *tag-regex*
-           (string->irregex "<\\?spark(.*?)\\?>"))
+           (string->irregex "<\\?spark(.*?)\\?>" 'single-line))
 	 (define *start-tag-len* (string-length "<?spark"))
 	 (define *end-tag-len* (string-length "?>"))
 
@@ -69,16 +69,13 @@
 	 (define (eval-script script state)
            (call-with-string-output-port
             (lambda (out)
-	   (let* ((spark-script (replace-tokens
-				 (substring script *start-tag-len* 
-					    (- (string-length script) *end-tag-len*))
-				 state))
-		  (in (open-string-input-port spark-script))
-		  (expr (read in)))
+	   (let* ((spark-script (replace-tokens script state))
+		  (in (open-string-input-port spark-script)))
              (let loop ()
                (let ((expr (read in)))
                   (when (not (eof-object? expr))
-                    (fprintf out "~a" (eval expr))
+                    (fprintf out "~a" (eval expr
+                                            (environment '(rnrs))))
                     (loop)))))))))
                    
 
