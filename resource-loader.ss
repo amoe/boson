@@ -134,7 +134,7 @@
                      (call-with-input-file uri get-string-all))))
 	 
 	 (define (read-fresh-script self uri)
-	   (let ((ret (load uri)))
+	   (let ((ret (load uri '(rnrs) '(session-util))))
 	     (hashtable-set! (resource-loader-s-script-cache self)
 			      uri ret)
 	     ret))

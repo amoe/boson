@@ -34,9 +34,9 @@
     (let-values (((keys values) (hashtable-entries hashtable)))
       (vector-for-each proc keys values)))
 
-  (define (load file)
+  (define (load file . import-spec)
     (eval (cons 'let (cons '() (read-forms file)))
-          (environment '(rnrs))))
+          (apply environment import-spec)))
 
   (define (read-forms file)
     (with-input-from-file file
