@@ -4,8 +4,7 @@
 (library (compat)
   (export filename-extension
           file-or-directory-modify-seconds
-          file-size-in-bytes
-          thread)
+          file-size-in-bytes)
   (import (rnrs)
           (irregex)
           (prefix (mosh file) mosh:)
@@ -27,10 +26,4 @@
   
   (define (file-size-in-bytes pathname)
     (mosh:file-size-in-bytes pathname))
-
-  ; NB: Inside the first argument of the macro SPAWN we have no access to
-  ; variables in the current namespace, so we can't use a closure - we must
-  ; pass the thunk in as an argument.
-  (define (thread thunk)
-    (mosh:spawn (lambda (p) (p)) thunk '((rnrs) (mosh concurrent))))
 )

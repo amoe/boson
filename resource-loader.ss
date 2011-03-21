@@ -39,8 +39,7 @@
 
 	 (define-record-type resource-loader-s
            (fields script-cache
-                   sml-cache)
-           (nongenerative))
+                   sml-cache))
 	 (define-record-type resource-s
            (fields content 
                    content-type

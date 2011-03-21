@@ -45,7 +45,6 @@
                  (prefix (mosh concurrent) mosh:))
 
 	 (define-record-type web-server-s
-           (nongenerative)   ; placate mosh
            (fields configuration
                    resource-loader
                    sessions
@@ -120,32 +119,21 @@
 					   self 'session-timeout))
 		    (sess-check-proc
 		     (lambda ()
+                       (debug "Checking GC")
 		       (let ((cs (current-seconds)))
-			 (cond 
-			  ((> (- cs last-check-secs)
-			      session-timeout-secs)			   
-			   (thread (lambda ()
-				     (sessions-gc-check self cs 
-							session-timeout-secs)))
-			   (set! last-check-secs cs)))))))
+			 (when (> (- cs last-check-secs) session-timeout-secs)
+                               (sessions-gc-check self cs 
+                                                  session-timeout-secs))
+                         (set! last-check-secs cs)))))
                (let loop ()
                  (debug "Inside listen loop")
                  (when (condition-check-proc)
                     (debug "Checked condition")
                     (let ((conn (listener-accept server-socket)))
                       (debug "Accepted connection")
-                      (let ((pid (mosh:spawn
-                         (lambda (args)
-                           (apply on-client-connect args))
-                         (list self conn)
-                         '((rnrs)
-                           (mosh concurrent)
-                           (web-server)
-                           (util)))))
-                        (mosh:join! pid)
-                      ;(thread (lambda () (on-client-connect self conn)))
+                      (on-client-connect self conn)
                       (sess-check-proc)
-                      (loop)))))))))
+                      (loop))))))))
 
 	 (define (web-server-stop self)
 	   (close-listener (web-server-s-server-socket self)))
@@ -268,6 +256,7 @@
 	     content))
 
 	 (define (handle-request self client-conn http-request)
+           (debug "Inside HANDLE-REQUEST")
 	   (if (invoke-hook self 'before-handle-request
 			    (list client-conn http-request))
 	       (let* ((content (loader::resource-loader-load
@@ -287,24 +276,32 @@
 			       client-conn
 			       error-message
 			       conf)
-	   (guard (ex (#t (write-log self '("(return-error): ~a." error))))
-             (send-response self client-conn
-                            (response::make-error-response
-                             error-message
-                             500 
-                             *HTTP-VERSION*))))
+	   (write-log self '("(return-error): ~a." error)))
+	   ;(guard (ex (#t (write-log self '("(return-error): ~a." error))))
+           ;  (send-response self client-conn
+           ;                 (response::make-error-response
+           ;                  error-message
+           ;                  500 
+           ;                  *HTTP-VERSION*))))
 	 
+         ; Discovery: Broken pipe is catchable from socket-send but not
+         ; put-bytevector.
 	 (define (send-response self client-conn resp)
+           (debug "Inside SEND-RESPONSE")
 	   (cond
             ((invoke-hook self 'before-send-response
 			       (list client-conn resp))
              (let ((output-port (connection-output-port client-conn)))
-               (put-bytevector output-port
-                               (string->utf8
-                                (response::response->string resp)))
-               (put-bytevector output-port
-                               (string->utf8
-                                (response::response-body resp)))))))
+               (guard (ex (#t (write-log self '("send error:: ~a." error))))
+               (debug "Putting bytevector for header")
+               (mosh:socket-send (connection-socket client-conn)
+                            (string->utf8
+                             (response::response->string resp)))
+               (debug "Putting bytevector for body")
+               (mosh:socket-send (connection-socket client-conn)
+                            (string->utf8
+                             (response::response-body resp)))
+               (debug "Terminating handler"))))))
 
 	 (define (write-log self entries)
 	   (if (not (list? entries))
