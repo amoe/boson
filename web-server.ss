@@ -183,20 +183,19 @@
 	 (define (on-client-connect self client-socket)
            (debug "Inside client connection thread")
 	   (let ((conf (web-server-s-configuration self)))
-             (with-exception-handler
-              (lambda (error)
-                (write-log self
-                           (list "Error: ~a in connection ~a."
-                                 error
-                                 client-socket))
-                (let ((str
-                       (cond
-                        ((string? error) error)
-                        ((parser::http-parser-error? error)
-                         (parser::http-parser-error-message error))
-                        (else (condition-message error)))))
-                (return-error self client-socket str conf)))
-              (lambda ()
+             (guard (error
+               (#t
+                 (write-log self
+                            (list "Error: ~a in connection ~a."
+                                  error
+                                  client-socket))
+                 (let ((str
+                        (cond
+                         ((string? error) error)
+                         ((parser::http-parser-error? error)
+                          (parser::http-parser-error-message error))
+                         (else (condition-message error)))))
+                   (return-error self client-socket str conf))))
                 (debug "Reading request")
                 (let* ((http-request (read-header conf client-socket))
                        (x (debug "Read request, reading body"))
@@ -207,7 +206,7 @@
                   (debug "Handling request")
                   (handle-request self 
                                   client-socket
-                                  http-request))))
+                                  http-request)))
 	     (guard (error (#t (write-log self
                                           '("Error: (socket-close): ~a.")
                                           error)))
