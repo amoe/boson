@@ -294,12 +294,23 @@
                (guard (ex (#t (write-log self '("send error:: ~a." error))))
                (debug "Putting bytevector for header")
                (mosh:socket-send (connection-socket client-conn)
-                            (string->utf8
-                             (response::response->string resp)))
+                                 (string->utf8
+                                  (response::response->string resp)))
+
+               ; Abstracted version [currently segfaults Mosh]:
+               ;(put-bytevector output-port
+               ;                (string->utf8 (response::response->string resp)))
+               
+               
                (debug "Putting bytevector for body")
                (mosh:socket-send (connection-socket client-conn)
-                            (string->utf8
-                             (response::response-body resp)))
+                                 (string->utf8
+                                  (response::response-body resp)))
+
+               ; Abstracted version [currently segfaults mosh]:
+               ;(put-bytevector output-port
+               ;                (string->utf8 (response::response-body resp)))
+
                (debug "Terminating handler"))))))
 
 	 (define (write-log self entries)
