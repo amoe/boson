@@ -291,7 +291,7 @@
             ((invoke-hook self 'before-send-response
 			       (list client-conn resp))
              (let ((output-port (connection-output-port client-conn)))
-               (guard (ex (#t (write-log self '("send error:: ~a." error))))
+               ;(guard (ex (#t (write-log self '("send error:: ~a." error))))
                (debug "Putting bytevector for header")
                (mosh:socket-send (connection-socket client-conn)
                                  (string->utf8
@@ -304,14 +304,13 @@
                
                (debug "Putting bytevector for body")
                (mosh:socket-send (connection-socket client-conn)
-                                 (string->utf8
-                                  (response::response-body resp)))
+                                  (response::response-body resp))
 
                ; Abstracted version [currently segfaults mosh]:
                ;(put-bytevector output-port
                ;                (string->utf8 (response::response-body resp)))
 
-               (debug "Terminating handler"))))))
+               (debug "Terminating handler")))))
 
 	 (define (write-log self entries)
 	   (if (not (list? entries))

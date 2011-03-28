@@ -76,7 +76,7 @@
 						   (list-ref ids 1)
 						   (http-request-data http-request)
 						   sessions)))
-		   (make-resource-s content 
+		   (make-resource-s (string->utf8 content)
 				    (string-length content)
 				    "text/html"
 				    (current-seconds))))
@@ -130,10 +130,11 @@
              (when (> sz (hashtable-ref web-server-conf 'max-response-size #f))
                (raise "Response will exceed maximum limit."))
              (values sz
-                     (call-with-input-file uri get-string-all))))
+                     (get-bytevector-all
+                      (open-file-input-port uri)))))
 	 
 	 (define (read-fresh-script self uri)
-	   (let ((ret (load uri '(rnrs) '(session-util))))
+	   (let ((ret (load uri '(rnrs) '(session-util) '(markdown))))
 	     (hashtable-set! (resource-loader-s-script-cache self)
 			      uri ret)
 	     ret))
