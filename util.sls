@@ -7,11 +7,15 @@
           char-punctuation?
           current-seconds
           hashtable-for-each
-          load)
+          load
+          get-line-bytevector)
   (import (rnrs)
           (rnrs eval)
           (prefix (srfi :19) srfi-19:)
           (srfi :48))
+
+  (define *line-feed* #x0a)
+  (define *carriage-return* #x0d)
   
 
   (define (fprintf output-port format-string . rest)
@@ -37,6 +41,21 @@
   (define (load file . import-spec)
     (eval (cons 'let (cons '() (read-forms file)))
           (apply environment import-spec)))
+
+  ; read CRLF
+  (define (get-line-bytevector binary-input-port)
+    (u8-list->bytevector
+     (let loop ()
+       (let ((byte (get-u8 binary-input-port)))
+         (cond
+          ((or (= byte *line-feed*)
+               (eof-object? byte))
+           '())
+          ((= byte *carriage-return*)
+           (get-u8 binary-input-port)    ; skip the next byte, assumed LF
+           '())
+          (else
+           (cons byte (loop))))))))
 
   (define (read-forms file)
     (with-input-from-file file
