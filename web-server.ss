@@ -1,338 +1,315 @@
-;; An HTTP server.
-;; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
-
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3 of the License, or
-;; (at your option) any later version.
-
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public License along
-;; with this program; If not, see <http://www.gnu.org/licenses/>.
-
-;; Please contact Vijay Mathew Pandyalakal if you need additional 
-;; information or have any questions.
-;; (Electronic mail: vijay.the.schemer@gmail.com)
-
-;; TODO:
-;;  * Test hooks.
-
 (library (web-server)
-	 (export web-server
-		 web-server-start
-		 web-server-stop
-		 web-server-socket
-		 web-server-configuration
-		 web-server-configuration!
-		 web-server-hook!
-		 write-log
-                 on-client-connect)		 
+  (export web-server
+          web-server-start
+          web-server-stop
+          web-server-socket
+          web-server-configuration
+          web-server-configuration!
+          web-server-hook!
+          write-log
+          on-client-connect)		 
 
-	 (import (rnrs)
-                 (util)
-                 (compat)
-                 (only (srfi :13) string-trim-both string-null?)
-                 (spells network)
-                 (prefix (request-parser) parser::)
-                 (prefix (resource-loader) loader::)
-                 (prefix (response) response::)
-                 (prefix (session) session::)
-                 (prefix (mosh socket) mosh:)
-                 (prefix (mosh concurrent) mosh:))
+  (import (rnrs)
+          (util)
+          (compat)
+          (only (srfi :13) string-trim-both string-null?)
+          (spells network)
+          (prefix (request-parser) parser::)
+          (prefix (resource-loader) loader::)
+          (prefix (response) response::)
+          (prefix (session) session::)
+          (prefix (mosh socket) mosh:)
+          (prefix (mosh concurrent) mosh:))
 
-	 (define-record-type web-server-s
-           (fields configuration
-                   resource-loader
-                   sessions
-                   (mutable server-socket
-                            web-server-s-server-socket
-                            set-web-server-s-server-socket!)
-                   (mutable hooks
-                            web-server-s-hooks
-                            set-web-server-s-hooks!)
-                   log-port))
+  (define-record-type web-server-s
+    (fields configuration
+            resource-loader
+            sessions
+            (mutable server-socket
+                     web-server-s-server-socket
+                     set-web-server-s-server-socket!)
+            (mutable hooks
+                     web-server-s-hooks
+                     set-web-server-s-hooks!)
+            log-port))
 
-	 (define *HTTP-VERSION* "HTTP/1.0")
+  (define *HTTP-VERSION* "HTTP/1.0")
 
-         (define (debug msg)
-           (display msg)
-           (newline)
-           (flush-output-port (current-output-port)))
+  (define (debug msg)
+    (display msg)
+    (newline)
+    (flush-output-port (current-output-port)))
 
-	 ;; (list) -> web-server
-	 ;; Creates a new web-server object. The list argument
-	 ;; contains key-values that make up the web-server configuration.
-	 ;; Valid key-values are
-	 ;; 'port integer - The port to listen on. Defaults to 80.
-	 ;; 'script-ext string - Script file extention. Defaults to "ss".
-	 ;; 'embedded-script-ext string - Embedded script file extention. 
-	 ;;                               Defaults to "sml".
-	 ;; 'session-timeout integer - Session timeout in seconds. 
-         ;;                            Defaults to 5 minutes.
-	 ;; 'max-header-length - Maximum number of bytes that the request
-	 ;;                      header can contain. Defaults to 512 Kb
-	 ;; 'max-body-length - Maximum number of bytes the body can contain.
-	 ;;                    Defaults to 5Mb.
-	 ;; 'max-response-size - Maximum size of response. Defaults to 5Mb.
-	 ;; E.g.: (web-server (list 'port 8080 'session-timeout 10))
-	 (define web-server
-	   (case-lambda
-	    (()
-	     (web-server (list 'port 80) (current-output-port)))
-	    ((conf)
-	     (web-server conf (current-output-port)))
-	    ((conf log-port)
-	     (let ((self (make-web-server-s (make-default-conf)
-					    (loader::resource-loader)
-					    (make-hashtable equal-hash equal?)
-					    #f #f
-					    log-port)))		  
-               (let loop ((conf conf))
-                 (when (not (null? conf))
-                   (web-server-configuration! self
-                                              (car conf)
-                                              (cadr conf))
-                   (loop (cddr conf))))
+  ;; (list) -> web-server
+  ;; Creates a new web-server object. The list argument
+  ;; contains key-values that make up the web-server configuration.
+  ;; Valid key-values are
+  ;; 'port integer - The port to listen on. Defaults to 80.
+  ;; 'script-ext string - Script file extention. Defaults to "ss".
+  ;; 'embedded-script-ext string - Embedded script file extention. 
+  ;;                               Defaults to "sml".
+  ;; 'session-timeout integer - Session timeout in seconds. 
+  ;;                            Defaults to 5 minutes.
+  ;; 'max-header-length - Maximum number of bytes that the request
+  ;;                      header can contain. Defaults to 512 Kb
+  ;; 'max-body-length - Maximum number of bytes the body can contain.
+  ;;                    Defaults to 5Mb.
+  ;; 'max-response-size - Maximum size of response. Defaults to 5Mb.
+  ;; E.g.: (web-server (list 'port 8080 'session-timeout 10))
+  (define web-server
+    (case-lambda
+     (()
+      (web-server (list 'port 80) (current-output-port)))
+     ((conf)
+      (web-server conf (current-output-port)))
+     ((conf log-port)
+      (let ((self (make-web-server-s (make-default-conf)
+                                     (loader::resource-loader)
+                                     (make-hashtable equal-hash equal?)
+                                     #f #f
+                                     log-port)))		  
+        (let loop ((conf conf))
+          (when (not (null? conf))
+                (web-server-configuration! self
+                                           (car conf)
+                                           (cadr conf))
+                (loop (cddr conf))))
 
-               (let ((port (web-server-configuration self 'port)))
-                 (set-web-server-s-server-socket!
-                  self
-                  (open-tcp-listener (quasiquote ((service (unquote port)))))))
-	       self))))
+        (let ((port (web-server-configuration self 'port)))
+          (set-web-server-s-server-socket!
+           self
+           (open-tcp-listener (quasiquote ((service (unquote port)))))))
+        self))))
 
-	 ;; (web-server procedure) -> bool
-	 ;; Starts the web-server and enters a listen loop.
-	 ;; The loop will continue to execute as long as
-	 ;; condition-check-proc returns #t.
-	 (define web-server-start
-	   (case-lambda
-	    ((self)
-	     (web-server-start self (lambda () #t)))
-	    ((self condition-check-proc)
-	     (let* ((server-socket (web-server-s-server-socket self))
-		    (last-check-secs (current-seconds))
-		    (session-timeout-secs (web-server-configuration 
-					   self 'session-timeout))
-		    (sess-check-proc
-		     (lambda ()
-                       (debug "Checking GC")
-		       (let ((cs (current-seconds)))
-			 (when (> (- cs last-check-secs) session-timeout-secs)
-                               (sessions-gc-check self cs 
-                                                  session-timeout-secs))
-                         (set! last-check-secs cs)))))
-               (let loop ()
-                 (debug "Inside listen loop")
-                 (when (condition-check-proc)
-                    (debug "Checked condition")
-                    (let ((conn (listener-accept server-socket)))
-                      (debug "Accepted connection")
-                      (on-client-connect self conn)
-                      (sess-check-proc)
-                      (loop))))))))
+  ;; (web-server procedure) -> bool
+  ;; Starts the web-server and enters a listen loop.
+  ;; The loop will continue to execute as long as
+  ;; condition-check-proc returns #t.
+  (define web-server-start
+    (case-lambda
+     ((self)
+      (web-server-start self (lambda () #t)))
+     ((self condition-check-proc)
+      (let* ((server-socket (web-server-s-server-socket self))
+             (last-check-secs (current-seconds))
+             (session-timeout-secs (web-server-configuration 
+                                    self 'session-timeout))
+             (sess-check-proc
+              (lambda ()
+                (debug "Checking GC")
+                (let ((cs (current-seconds)))
+                  (when (> (- cs last-check-secs) session-timeout-secs)
+                        (sessions-gc-check self cs 
+                                           session-timeout-secs))
+                  (set! last-check-secs cs)))))
+        (let loop ()
+          (debug "Inside listen loop")
+          (when (condition-check-proc)
+                (debug "Checked condition")
+                (let ((conn (listener-accept server-socket)))
+                  (debug "Accepted connection")
+                  (on-client-connect self conn)
+                  (sess-check-proc)
+                  (loop))))))))
 
-	 (define (web-server-stop self)
-	   (close-listener (web-server-s-server-socket self)))
+  (define (web-server-stop self)
+    (close-listener (web-server-s-server-socket self)))
 
-	 ;; Hooks could be:
-	 ;; 'before-handle-request - (hook-proc web-server-obj 
-	 ;;                                     client-connection http-request)
-	 ;; If the before-handle-request procedure returns #f, no reponse
-	 ;; will be generated by the web-server's handle-request.
-	 ;; 'before-send-response - (hook-proc web-server-obj client-connection
-	 ;;                                    response-contents)
-	 ;; If the before-send-response procedure returns #f, no reponse
-	 ;; will be generated by the web-server's handle-request.
-	 (define (web-server-hook! self hook-name
-				   hook-proc)
-	   (let ((hooks (web-server-s-hooks self)))
-             (when (not hooks)
-               (set! hooks (make-eq-hashtable))
-               (set-web-server-s-hooks! self hooks))
-             (hashtable-set! hooks hook-name hook-proc)))
+  ;; Hooks could be:
+  ;; 'before-handle-request - (hook-proc web-server-obj 
+  ;;                                     client-connection http-request)
+  ;; If the before-handle-request procedure returns #f, no reponse
+  ;; will be generated by the web-server's handle-request.
+  ;; 'before-send-response - (hook-proc web-server-obj client-connection
+  ;;                                    response-contents)
+  ;; If the before-send-response procedure returns #f, no reponse
+  ;; will be generated by the web-server's handle-request.
+  (define (web-server-hook! self hook-name
+                            hook-proc)
+    (let ((hooks (web-server-s-hooks self)))
+      (when (not hooks)
+            (set! hooks (make-eq-hashtable))
+            (set-web-server-s-hooks! self hooks))
+      (hashtable-set! hooks hook-name hook-proc)))
 
-	 (define (web-server-socket self)
-	   (web-server-s-server-socket self))
+  (define (web-server-socket self)
+    (web-server-s-server-socket self))
 
-	 (define (web-server-configuration self conf-key)
-	   (hashtable-ref (web-server-s-configuration self) 
-			   conf-key #f))
+  (define (web-server-configuration self conf-key)
+    (hashtable-ref (web-server-s-configuration self) 
+                   conf-key #f))
 
-	 (define (web-server-configuration! self 
-					    conf-key
-					    conf-value)
-	   (let ((conf (web-server-s-configuration self)))
-	     (hashtable-set! conf conf-key conf-value)))
-	 
-	 (define (make-default-conf)
-	   (let ((conf (make-eq-hashtable)))
-	     (hashtable-set! conf 'port 80)
-	     (hashtable-set! conf 'script-ext "ss")
-	     (hashtable-set! conf 'embedded-script-ext "sml")
-	     (hashtable-set! conf 'session-timeout (* 5 60)) ;; 5 minutes
-	     (hashtable-set! conf 'max-header-length (* 1024 512)) ;; 512Kb
-	     (hashtable-set! conf 'max-body-length (* 1024 5120)) ;; 5Mb
-	     (hashtable-set! conf 'max-response-size (* 1024 5120)) ;; 5Mb
-	     conf))
+  (define (web-server-configuration! self 
+                                     conf-key
+                                     conf-value)
+    (let ((conf (web-server-s-configuration self)))
+      (hashtable-set! conf conf-key conf-value)))
+  
+  (define (make-default-conf)
+    (let ((conf (make-eq-hashtable)))
+      (hashtable-set! conf 'port 80)
+      (hashtable-set! conf 'script-ext "ss")
+      (hashtable-set! conf 'embedded-script-ext "sml")
+      (hashtable-set! conf 'session-timeout (* 5 60)) ;; 5 minutes
+      (hashtable-set! conf 'max-header-length (* 1024 512)) ;; 512Kb
+      (hashtable-set! conf 'max-body-length (* 1024 5120)) ;; 5Mb
+      (hashtable-set! conf 'max-response-size (* 1024 5120)) ;; 5Mb
+      conf))
 
-	 ;; Called when a new client connection is established.
-	 (define (on-client-connect self client-socket)
-           (debug "Inside client connection thread")
-	   (let ((conf (web-server-s-configuration self)))
-             (guard (error
-               (#t
-                 (write-log self
-                            (list "Error: ~a in connection ~a."
-                                  error
-                                  client-socket))
-                 (let ((str
-                        (cond
-                         ((string? error) error)
-                         ((parser::http-parser-error? error)
-                          (parser::http-parser-error-message error))
-                         (else (condition-message error)))))
-                   (return-error self client-socket str conf))))
-                (debug "Reading request")
-                (let* ((http-request (read-header conf client-socket))
-                       (x (debug "Read request, reading body"))
-                       (body-str (read-body conf client-socket http-request)))
-                  (debug "Read both request and body")
-                  (if (> (string-length (string-trim-both body-str)) 0)
-                      (parser::http-request-data! http-request body-str))
-                  (debug "Handling request")
-                  (handle-request self 
-                                  client-socket
-                                  http-request)))
-	     (guard (error (#t (write-log self
-                                          '("Error: (socket-close): ~a.")
-                                          error)))
-	      (close-connection client-socket))))
+  ;; Called when a new client connection is established.
+  (define (on-client-connect self client-socket)
+    (debug "Inside client connection thread")
+    (let ((conf (web-server-s-configuration self)))
+      (guard (error
+              (#t
+               (write-log self
+                          (list "Error: ~a in connection ~a."
+                                error
+                                client-socket))
+               (let ((str
+                      (cond
+                       ((string? error) error)
+                       ((parser::http-parser-error? error)
+                        (parser::http-parser-error-message error))
+                       (else (condition-message error)))))
+                 (return-error self client-socket str conf))))
+             (debug "Reading request")
+             (let* ((http-request (read-header conf client-socket))
+                    (x (debug "Read request, reading body"))
+                    (body-str (read-body conf client-socket http-request)))
+               (debug "Read both request and body")
+               (if (> (string-length (string-trim-both body-str)) 0)
+                   (parser::http-request-data! http-request body-str))
+               (debug "Handling request")
+               (handle-request self 
+                               client-socket
+                               http-request)))
+      (guard (error (#t (write-log self
+                                   '("Error: (socket-close): ~a.")
+                                   error)))
+             (close-connection client-socket))))
 
-	 (define (read-header conf client-socket)
-           (debug "Reading header")
-	   (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
-		 (http-request (parser::http-request))
-		 (request-parsed #f)
-                 (client-port (connection-input-port client-socket)))
-             (debug "About to get line")
-             (let loop ((running-header-length 0))
-               (let ((line (utf8->string (get-line-bytevector client-port))))
-               (cond
-                 ((or (string-null? line) (eof-object? line)) #f)
-                 ((> running-header-length max-header-length)
-                   (raise "Header content is too long."))
-                 (else
-                  (debug (string-append "Received a line: " line))
-                  (when (not request-parsed)
-                    (parser::http-request-request! http-request line)
-                    (set! request-parsed #t))
-                  (loop (+ running-header-length (string-length line)))))))
-               (debug "Returning")
-               http-request))
+  (define (read-header conf client-socket)
+    (debug "Reading header")
+    (let ((max-header-length (hashtable-ref conf 'max-header-length #f))
+          (http-request (parser::http-request))
+          (request-parsed #f)
+          (client-port (connection-input-port client-socket)))
+      (debug "About to get line")
+      (let loop ((running-header-length 0))
+        (let ((line (utf8->string (get-line-bytevector client-port))))
+          (cond
+           ((or (string-null? line) (eof-object? line)) #f)
+           ((> running-header-length max-header-length)
+            (raise "Header content is too long."))
+           (else
+            (debug (string-append "Received a line: " line))
+            (when (not request-parsed)
+                  (parser::http-request-request! http-request line)
+                  (set! request-parsed #t))
+            (loop (+ running-header-length (string-length line)))))))
+      (debug "Returning")
+      http-request))
 
-	 (define (read-body conf client-socket http-request)
-	   (let ((max-body-length (hashtable-ref conf 'max-body-length #f))
-		 (content-length (string->number
-                                  (parser::http-request-header 
-                                   http-request "content-length" "0")))
-		 (content "")
-                 (input-port (connection-input-port client-socket)))
-	     (if (number? content-length)
-		 (if (> content-length 0)
-		     (cond ((> content-length max-body-length)
-			    (raise "Content is too long."))
-			   (else
-			    (set! content
-                                  (get-string-n input-port
-                                                content-length))))))
-	     content))
+  (define (read-body conf client-socket http-request)
+    (let ((max-body-length (hashtable-ref conf 'max-body-length #f))
+          (content-length (string->number
+                           (parser::http-request-header 
+                            http-request "content-length" "0")))
+          (content "")
+          (input-port (connection-input-port client-socket)))
+      (if (number? content-length)
+          (if (> content-length 0)
+              (cond ((> content-length max-body-length)
+                     (raise "Content is too long."))
+                    (else
+                     (set! content
+                           (get-string-n input-port
+                                         content-length))))))
+      content))
 
-	 (define (handle-request self client-conn http-request)
-           (debug "Inside HANDLE-REQUEST")
-	   (if (invoke-hook self 'before-handle-request
-			    (list client-conn http-request))
-	       (let* ((content (loader::resource-loader-load
-				(web-server-s-resource-loader self)
-				(web-server-s-configuration self)
-				http-request
-				(web-server-s-sessions self)))
-		      (response (response::make-response
-				 *HTTP-VERSION*
-				 (loader::resource-content content)
-				 (loader::resource-content-length content)
-				 (loader::resource-content-type content)
-				 (loader::resource-content-last-modified content))))
-		 (send-response self client-conn response))))
+  (define (handle-request self client-conn http-request)
+    (debug "Inside HANDLE-REQUEST")
+    (if (invoke-hook self 'before-handle-request
+                     (list client-conn http-request))
+        (let* ((content (loader::resource-loader-load
+                         (web-server-s-resource-loader self)
+                         (web-server-s-configuration self)
+                         http-request
+                         (web-server-s-sessions self)))
+               (response (response::make-response
+                          *HTTP-VERSION*
+                          (loader::resource-content content)
+                          (loader::resource-content-length content)
+                          (loader::resource-content-type content)
+                          (loader::resource-content-last-modified content))))
+          (send-response self client-conn response))))
 
-	 (define (return-error self
-			       client-conn
-			       error-message
-			       conf)
-	   (write-log self '("(return-error): ~a." error)))
-	   ;(guard (ex (#t (write-log self '("(return-error): ~a." error))))
-           ;  (send-response self client-conn
-           ;                 (response::make-error-response
-           ;                  error-message
-           ;                  500 
-           ;                  *HTTP-VERSION*))))
-	 
-         ; Discovery: Broken pipe is catchable from socket-send but not
-         ; put-bytevector.
-	 (define (send-response self client-conn resp)
-           (debug "Inside SEND-RESPONSE")
-	   (cond
-            ((invoke-hook self 'before-send-response
-			       (list client-conn resp))
-             (let ((output-port (connection-output-port client-conn)))
-               ;(guard (ex (#t (write-log self '("send error:: ~a." error))))
-               (debug "Putting bytevector for header")
+  (define (return-error self
+                        client-conn
+                        error-message
+                        conf)
+    (write-log self '("(return-error): ~a." error)))
+                                        ;(guard (ex (#t (write-log self '("(return-error): ~a." error))))
+                                        ;  (send-response self client-conn
+                                        ;                 (response::make-error-response
+                                        ;                  error-message
+                                        ;                  500 
+                                        ;                  *HTTP-VERSION*))))
+  
+                                        ; Discovery: Broken pipe is catchable from socket-send but not
+                                        ; put-bytevector.
+  (define (send-response self client-conn resp)
+    (debug "Inside SEND-RESPONSE")
+    (cond
+     ((invoke-hook self 'before-send-response
+                   (list client-conn resp))
+      (let ((output-port (connection-output-port client-conn)))
+                                        ;(guard (ex (#t (write-log self '("send error:: ~a." error))))
+        (debug "Putting bytevector for header")
 
-               ; Abstracted version [currently segfaults Mosh]:
-               (put-bytevector output-port
-                               (string->utf8 (response::response->string resp)))
-               
-               
-               (debug "Putting bytevector for body")
-               ; Abstracted version [currently segfaults mosh]:
-               (put-bytevector output-port
-                               (response::response-body resp))
+                                        ; Abstracted version [currently segfaults Mosh]:
+        (put-bytevector output-port
+                        (string->utf8 (response::response->string resp)))
+        
+        
+        (debug "Putting bytevector for body")
+                                        ; Abstracted version [currently segfaults mosh]:
+        (put-bytevector output-port
+                        (response::response-body resp))
 
-               (debug "Terminating handler")))))
+        (debug "Terminating handler")))))
 
-	 (define (write-log self entries)
-	   (if (not (list? entries))
-	       (set! entries (list entries)))
-	   (let ((port (web-server-s-log-port self)))
-	     (when (not (null? port))
-               (apply fprintf (cons port entries))
-               (newline port)
-               (flush-output-port port))))
+  (define (write-log self entries)
+    (if (not (list? entries))
+        (set! entries (list entries)))
+    (let ((port (web-server-s-log-port self)))
+      (when (not (null? port))
+            (apply fprintf (cons port entries))
+            (newline port)
+            (flush-output-port port))))
 
-	 (define (invoke-hook self hook-name hook-args)
-	   (let ((hooks (web-server-s-hooks self))
-		 (ret #t))
-	     (if hooks
-		 (let ((hook-proc (hashtable-ref hooks hook-name #f)))
-		   (when hook-proc
-                     (set! ret (apply hook-proc (cons self hook-args))))))
-	     ret))
+  (define (invoke-hook self hook-name hook-args)
+    (let ((hooks (web-server-s-hooks self))
+          (ret #t))
+      (if hooks
+          (let ((hook-proc (hashtable-ref hooks hook-name #f)))
+            (when hook-proc
+                  (set! ret (apply hook-proc (cons self hook-args))))))
+      ret))
 
-	 (define (sessions-gc-check self curr-secs
-				    session-timeout-secs)
-	   (let ((sessions (web-server-s-sessions self))
-		 (gc-session-ids (list)))
-	     (hashtable-for-each 
-	      sessions
-	      (lambda (id session)
-		(if (> (- curr-secs (session::session-last-access session))
-		       session-timeout-secs)		    
-		    (set! gc-session-ids (cons id gc-session-ids)))))
-             (for-each (lambda (id) (session::session-destroy id sessions))
-                       gc-session-ids)))
+  (define (sessions-gc-check self curr-secs
+                             session-timeout-secs)
+    (let ((sessions (web-server-s-sessions self))
+          (gc-session-ids (list)))
+      (hashtable-for-each 
+       sessions
+       (lambda (id session)
+         (if (> (- curr-secs (session::session-last-access session))
+                session-timeout-secs)		    
+             (set! gc-session-ids (cons id gc-session-ids)))))
+      (for-each (lambda (id) (session::session-destroy id sessions))
+                gc-session-ids)))
 
 )
-	       
+
