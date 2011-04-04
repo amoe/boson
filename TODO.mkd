@@ -1,0 +1,7 @@
+TODO
+----
+
+* The exception handler in on-client-connect should provide some way to identify
+the client connection: preferably the requesting IP address should be written to
+the log file, but Mosh currently does not provide a way to get this information
+from a socket.  Support would also need to added to (spells network) library.

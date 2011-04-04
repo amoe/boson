@@ -162,10 +162,7 @@
     (let ((conf (web-server-s-configuration self)))
       (guard (error
               (#t
-               (write-log self
-                          (list "Error: ~a in connection ~a."
-                                error
-                                client-socket))
+               (write-log self (list "Error: ~a" (condition-message error)))
                (let ((str
                       (cond
                        ((string? error) error)
