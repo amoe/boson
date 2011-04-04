@@ -6,6 +6,7 @@
           resource-content-length
           resource-content-last-modified)
   (import (rnrs)
+          (rnrs eval)
           (util)
           (compat)
           (session) 
@@ -13,6 +14,7 @@
           (globals)
           (sml-parser)
           (mime-types)
+          (spells pathname)
           (only (srfi :13) string-index))
 
   (define-record-type resource-loader-s
@@ -112,10 +114,18 @@
                (open-file-input-port uri)))))
   
   (define (read-fresh-script self uri)
-    (let ((ret (load uri '(rnrs) '(session-util) '(markdown))))
+    (let ((ret (load-servlet uri)))
       (hashtable-set! (resource-loader-s-script-cache self)
                       uri ret)
       ret))
+
+  (define (uri->library uri)
+    (list
+     (string->symbol
+      (file-name (pathname-file (->pathname uri))))))
+
+  (define (load-servlet uri)
+    (eval 'start (environment (uri->library uri))))
 
   (define (normalize-uri uri)
     (if (char=? (string-ref uri 0) #\/)
