@@ -1,7 +1,7 @@
-(library (mime-types)
+(library (boson mime-types)
   (export find-mime-type)
   (import (rnrs)
-          (compat))
+          (boson compat))
   
   (define mime-types (list 
                       (cons "html" "text/html")

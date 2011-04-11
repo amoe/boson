@@ -1,12 +1,12 @@
 ; Mosh compatibility layer.  All code should eventually be migrated to
 ; respective R6RS cross-implementation libraries.
 
-(library (compat)
+(library (boson compat)
   (export filename-extension
           file-or-directory-modify-seconds
           file-size-in-bytes)
   (import (rnrs)
-          (irregex)
+          (wak irregex)
           (prefix (mosh file) mosh:)
           (prefix (mosh concurrent) mosh:))
 

@@ -1,9 +1,9 @@
-(library (sml-parser)
+(library (boson sml-parser)
   (export execute-embedded-script)
   (import (rnrs)
           (rnrs eval)
-          (compat)
-          (util)
+          (boson compat)
+          (boson util)
           (wak irregex))
 
   (define (execute-embedded-script sml-doc http-data)

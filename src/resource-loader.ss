@@ -1,4 +1,4 @@
-(library (resource-loader)
+(library (boson resource-loader)
   (export resource-loader 
           resource-loader-load
           resource-content
@@ -7,13 +7,13 @@
           resource-content-last-modified)
   (import (rnrs)
           (rnrs eval)
-          (util)
-          (compat)
-          (session) 
-          (request-parser)
-          (globals)
-          (sml-parser)
-          (mime-types)
+          (boson util)
+          (boson compat)
+          (boson session) 
+          (boson request-parser)
+          (boson globals)
+          (boson sml-parser)
+          (boson mime-types)
           (spells pathname)
           (only (srfi :13) string-index))
 

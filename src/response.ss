@@ -1,4 +1,4 @@
-(library (response)
+(library (boson response)
   (export make-response 
           make-error-response
           response-status-line
@@ -11,8 +11,8 @@
           response-header-value!
           response->string)
   (import (rnrs)
-          (compat)
-          (util)
+          (boson compat)
+          (boson util)
           (srfi :19))
   
   (define-record-type response-s

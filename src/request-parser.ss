@@ -1,4 +1,4 @@
-(library (request-parser)
+(library (boson request-parser)
   (export http-request
           http-request-request!
           http-request-header!
@@ -15,9 +15,9 @@
           http-parser-error-message)
 
   (import (rnrs)
-          (compat)
-          (util)
-          (url-encode)
+          (boson compat)
+          (boson util)
+          (boson url-encode)
           (spells string-utils)
           (only (srfi :13) string-index
                 string-trim-both))

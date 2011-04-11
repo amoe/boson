@@ -1,4 +1,4 @@
-(library (http)
+(library (boson http)
   (export web-server                    ; web-server.ss 
           web-server-start
           web-server-stop
@@ -19,7 +19,7 @@
           http-share-state?
           make-default-session-state)
 
-  (import (web-server)
-          (mime-types)
-          (session-util)))
+  (import (boson web-server)
+          (boson mime-types)
+          (boson session-util)))
 

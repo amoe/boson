@@ -1,4 +1,4 @@
-(library (globals)
+(library (boson globals)
   (export *sess-id-sep*
           *script-ext*)
   (import (rnrs))

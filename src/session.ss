@@ -1,12 +1,12 @@
-(library (session)
+(library (boson session)
   (export session-execute-procedure
           session-destroy
           session-last-access)
   (import (rnrs)
-          (util)
-          (globals)
-          (session-util)
-          (compat)
+          (boson util)
+          (boson globals)
+          (boson session-util)
+          (boson compat)
           (only (srfi :1) list-index)
           (only (srfi :13) string-index string-index-right))
 

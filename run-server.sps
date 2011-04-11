@@ -2,7 +2,7 @@
 #!r6rs
 
 (import (rnrs)
-        (http))
+        (boson http))
 
 (define httpd (web-server (list 'port 8080)))
 (web-server-start httpd (lambda () #t))

@@ -1,7 +1,7 @@
 ; Utility code that doesn't find anywhere else and has a portable
 ; implementation.
 
-(library (util)
+(library (boson util)
   (export fprintf
           char-symbolic?
           char-punctuation?

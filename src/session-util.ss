@@ -1,4 +1,4 @@
-(library (session-util)
+(library (boson session-util)
   (export http-value
           http-value! 
           http-call

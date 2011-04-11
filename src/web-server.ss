@@ -1,4 +1,4 @@
-(library (web-server)
+(library (boson web-server)
   (export web-server
           web-server-start
           web-server-stop
@@ -10,14 +10,14 @@
           on-client-connect)		 
 
   (import (rnrs)
-          (util)
-          (compat)
+          (boson util)
+          (boson compat)
           (only (srfi :13) string-trim-both string-null?)
           (spells network)
-          (prefix (request-parser) parser::)
-          (prefix (resource-loader) loader::)
-          (prefix (response) response::)
-          (prefix (session) session::)
+          (prefix (boson request-parser) parser::)
+          (prefix (boson resource-loader) loader::)
+          (prefix (boson response) response::)
+          (prefix (boson session) session::)
           (prefix (mosh socket) mosh:)
           (prefix (mosh concurrent) mosh:))
 

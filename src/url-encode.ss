@@ -1,9 +1,9 @@
-(library (url-encode)
+(library (boson url-encode)
   (export url-encode
           url-decode)
   (import (rnrs)
-          (compat)
-          (util))
+          (boson compat)
+          (boson util))
 
   (define (url-encode str)
     (call-with-string-output-port
