@@ -51,6 +51,12 @@
               (in (open-string-input-port spark-script)))
          (let loop ()
            (let ((expr (read in)))
+             ; XXX: Original code will not print void results, in the sense of
+             ; PLT's VOID?.  We have to remove this check as this feature is
+             ; inherently unportable.  This means that (for instance)
+             ; side-effecting I/O functions used in SML may output some
+             ; implementation-defined value.  This is not to be construed as a
+             ; feature.
              (when (not (eof-object? expr))
                    (fprintf out "~a" (eval expr
                                            (environment '(rnrs))))
