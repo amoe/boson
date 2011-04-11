@@ -57,8 +57,8 @@
                                             (http-request-data http-request)
                                             sessions)))
             (make-resource-s (string->utf8 content)
-                             (string-length content)
                              "text/html"
+                             (string-length content)
                              (current-seconds))))
          (else (make-resource-s res
                                 (content-type uri)
@@ -190,4 +190,6 @@
            (session-execute-procedure 
             uri res sess-id 
             proc-count http-data sessions)))
-      content)))
+      content))
+
+)
