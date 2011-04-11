@@ -8,3 +8,5 @@ from a socket.  Support would also need to added to (spells network) library.
 
 * Handle mapping between URIs and servlet hierarchies, like
 (my-web-app entry-point)
+
+* Vulnerable to path traversal.
