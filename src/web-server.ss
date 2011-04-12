@@ -17,9 +17,7 @@
           (prefix (boson request-parser) parser::)
           (prefix (boson resource-loader) loader::)
           (prefix (boson response) response::)
-          (prefix (boson session) session::)
-          (prefix (mosh socket) mosh:)
-          (prefix (mosh concurrent) mosh:))
+          (prefix (boson session) session::))
 
   (define-record-type web-server-s
     (fields configuration
@@ -262,16 +260,13 @@
      ((invoke-hook self 'before-send-response
                    (list client-conn resp))
       (let ((output-port (connection-output-port client-conn)))
-                                        ;(guard (ex (#t (write-log self '("send error:: ~a." error))))
         (debug "Putting bytevector for header")
 
-                                        ; Abstracted version [currently segfaults Mosh]:
         (put-bytevector output-port
                         (string->utf8 (response::response->string resp)))
         
         
         (debug "Putting bytevector for body")
-                                        ; Abstracted version [currently segfaults mosh]:
         (put-bytevector output-port
                         (response::response-body resp))
 
