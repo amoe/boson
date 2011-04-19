@@ -1,0 +1,90 @@
+README
+======
+
+Boson is a port of the Fermion web server, which was originally written by Vijay
+Mathew for the Spark Scheme system.  This version should be portable to any
+R6RS-compliant system.  It has been tested with the following systems:
+
+* Mosh (primary development platform)
+* Ikarus (SVN version)
+* Vicare
+* Ypsilon
+* Petite Chez Scheme
+* Guile
+* Larceny
+* IronScheme
+* Racket
+
+Installation
+------------
+
+Boson depends on the following R6RS libraries:
+
+* SRFI collection at
+  https://code.launchpad.net/~scheme-libraries-team/scheme-libraries/srfi
+* spells, available at https://github.com/rotty/spells
+* (wak irregex) from http://gitorious.org/wak
+
+I suggest to use the most recent version of all of these.  As of this writing
+(2011-04-19), all have recent changes which are necessary to run Boson
+
+Goals
+-----
+
+As this is the first release, version 1, I am aiming to stay as close to the
+Fermion source as possible.  As far as possible, this functions the same as
+Fermion, with a few caveats:
+
+* Most importantly, see the note about concurrency below.
+* The API for Scheme scripts has been incompatibly changed, as R6RS does not
+  define LOAD.
+* I have fixed an egregious path traversal vulnerability in the URL handling
+  code.
+* I have fixed a bug where the content-length and content-type headers were
+  reversed.
+
+In the long run, I plan to diverge significantly from Fermion.  Most notably I
+plan to remove the SML feature and a lot of the static file serving features, so
+beware of relying on these.
+
+Concurrency
+-----------
+
+TL;DR = Boson is not concurrent.
+
+The original Fermion uses PLT's extremely simple threading API from v371, see
+[1].  However this code was mainly developed on Mosh, and while Mosh does
+provide a concurrency API, it requires all shared structures to be declared as
+nongenerative.  This seems quite an invasive change and I am still considering a
+better way to do it.  On the other hand, a blocking server is actually no
+problem for my needs, so I thought it was worth releasing in any case.
+
+In the future I will probably introduce concurrency using a coroutine pool.
+(Note that it still won't be real multicore concurrency, but at least it won't
+be so egregiously blocking.)
+
+Running Boson under daemontools
+-------------------------------
+
+This is a nice way to run Boson as it means you can reload changes easily with
+minimal downtime.  To do this you can run the install_dt makefile target.  This
+will create a daemontools control directory which is located at
+/usr/local/etc/daemontools/boson by default, you can modify the makefile or pass
+a parameter to change the path.
+
+Permissions, etc is up to you.
+
+License
+-------
+
+As it is a derivative of Spark Scheme, Boson is distributed under the GPLv3.
+Therefore derived works must also be under the GPL.
+
+Bugs
+----
+
+Please report them to <amoebae@gmail.com>.
+Currently I don't have any kind of bug tracking system to enter them into, sorry
+about that.
+
+[1]  http://download.plt-scheme.org/doc/371/html/mzscheme/mzscheme-Z-H-7.html
