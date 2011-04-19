@@ -1,9 +1,6 @@
 (library (boson globals)
-  (export *sess-id-sep*
-          *script-ext*)
+  (export *sess-id-sep*)
   (import (rnrs))
 
   (define *sess-id-sep* #\$)
-  (define *script-ext* "ss")
-
 )
