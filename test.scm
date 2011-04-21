@@ -12,4 +12,4 @@
 (test-assert http:web-server)
 (test-assert http:web-server-start)
 (test-assert http:web-server-stop)
-(test-end "globals")
+(test-end "http")
