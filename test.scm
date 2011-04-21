@@ -49,6 +49,10 @@
   (test-error string?    (session-util:http-call 1234)))   ; error case.
 (test-end "session-util")
   
-;(test-begin "url-encode")
-;(test-assert url-encode:url-decode)
-;(test-end "url-encode")
+(test-begin "url-encode")
+(test-equal "hello" (url-encode:url-decode "hello"))
+(test-equal "hello world" (url-encode:url-decode "hello%20world"))
+(test-equal "~tilde~" (url-encode:url-decode "%7Etilde%7E"))
+(test-equal "~tilde~" (url-encode:url-decode "%7etilde%7e"))   ; should be case
+                                                               ; insensitive
+(test-end "url-encode")
