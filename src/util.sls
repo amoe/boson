@@ -22,11 +22,6 @@
     (display (apply format (cons format-string rest))
              output-port))
 
-  ; returns #t if char's Unicode general category is Sm, Sc, Sk, or So, #f
-  ; otherwise.
-  (define (char-symbolic? . args) (raise 'unimplemented))
-  (define (char-punctuation? . args) (raise 'unimplemented))
-
   ; return current UTC seconds since epoch
   (define (current-seconds)
     (srfi-19:time-second (srfi-19:current-time)))

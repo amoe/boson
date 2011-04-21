@@ -3,6 +3,7 @@
         (prefix (boson http) http:)
         (prefix (boson compat) compat:)
         (prefix (boson session-util) session-util:)
+        (prefix (boson url-encode) url-encode:)
         (sistim wrap64))
 
 (test-begin "globals")
@@ -46,6 +47,8 @@
 (let ((proc (lambda (x) x)))   ; never actually called, just type-checked
   (test-error procedure? (session-util:http-call proc))
   (test-error string?    (session-util:http-call 1234)))   ; error case.
-  
-;; (test-assert session-util:make-default-session-state)
 (test-end "session-util")
+  
+;(test-begin "url-encode")
+;(test-assert url-encode:url-decode)
+;(test-end "url-encode")
