@@ -3,8 +3,6 @@
 
 (library (boson util)
   (export fprintf
-          char-symbolic?
-          char-punctuation?
           current-seconds
           hashtable-for-each
           load
