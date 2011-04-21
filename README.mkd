@@ -28,6 +28,13 @@ Boson depends on the following R6RS libraries:
 I suggest to use the most recent version of all of these.  As of this writing
 (2011-04-19), all have recent changes which are necessary to run Boson
 
+Test suite
+----------
+
+The test suite is contained in the file test.scm.  It uses the library (sistim
+wrap64) which is a custom test runner for the SRFI-64 testing API.  You can
+execute the tests using 'make test'.
+
 Goals
 -----
 
@@ -42,6 +49,9 @@ Fermion, with a few caveats:
   code.
 * I have fixed a bug where the content-length and content-type headers were
   reversed.
+
+I have cleaned up and removed code wherever I can do so without affecting
+functionality.
 
 In the long run, I plan to diverge significantly from Fermion.  Most notably I
 plan to remove the SML feature and a lot of the static file serving features, so
@@ -71,8 +81,6 @@ minimal downtime.  To do this you can run the install_dt makefile target.  This
 will create a daemontools control directory which is located at
 /usr/local/etc/daemontools/boson by default, you can modify the makefile or pass
 a parameter to change the path.
-
-Permissions, etc is up to you.
 
 License
 -------
