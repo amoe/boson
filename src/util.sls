@@ -27,6 +27,7 @@
   ; "applies the procedure proc to each element in hashtable (for the
   ; side-effects of proc) in an unspecified order and returns void. The
   ; procedure proc must take two arguments: a key and its value."
+  ; Nuts argument ordering.
   (define (hashtable-for-each hashtable proc)
     (let-values (((keys values) (hashtable-entries hashtable)))
       (vector-for-each proc keys values)))

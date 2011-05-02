@@ -4,6 +4,7 @@
         (prefix (boson compat) compat:)
         (prefix (boson session-util) session-util:)
         (prefix (boson url-encode) url-encode:)
+        (prefix (boson util) util:)
         (sistim wrap64))
 
 (test-begin "globals")
@@ -56,3 +57,36 @@
 (test-equal "~tilde~" (url-encode:url-decode "%7etilde%7e"))   ; should be case
                                                                ; insensitive
 (test-end "url-encode")
+
+
+(test-begin "util")
+(test-equal "fry bender leela"
+            (call-with-string-output-port
+             (lambda (p)
+               (util:fprintf p "~a ~a ~a" "fry" "bender" "leela"))))
+
+(test-equal "fry"
+            (call-with-string-output-port
+             (lambda (p)
+               (util:fprintf p "f~cy" #\r))))
+
+(test-equal "new\nlines\nrule"
+            (call-with-string-output-port
+             (lambda (p)
+               (util:fprintf p "~a~%~a~%~a" "new" "lines" "rule"))))
+
+(test-assert (integer? (util:current-seconds)))
+; great scott!
+(test-assert (not (zero? (util:current-seconds))))
+
+(let ((counter 0)
+      (ht (make-eq-hashtable)))
+  (hashtable-set! ht 'foo 'bar)
+  (hashtable-set! ht 'baz 'quux)
+  (hashtable-set! ht 'fry 'bender)
+  (util:hashtable-for-each ht
+   (lambda (key val)
+     (set! counter (+ counter 1))))
+  (test-eqv 3 counter))
+
+(test-end "util")
