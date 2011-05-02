@@ -9,7 +9,7 @@
           http-request-headers
           http-request-header
           http-request-data
-          http-request->string
+
           ;; Exception
           http-parser-error?
           http-parser-error-message)
@@ -116,19 +116,4 @@
                  (eq? method 'POST)))
         (raise "Method not supported.")
         method))
-
-  (define (http-request->string self)
-    (call-with-string-output-port
-     (lambda (out)
-       (fprintf out "~a ~a ~a~n" 
-                (http-request-s-method self)
-                (http-request-s-uri self)	     
-                (http-request-s-version self))
-       (hashtable-for-each
-        (http-request-s-headers self)
-        (lambda (k v) (fprintf out "~a: ~a~n" k v)))
-       (fprintf out "~n")
-       (if (not (null? (http-request-s-data self)))
-           (fprintf out "~a" (http-request-s-data self))))))
-
 )
