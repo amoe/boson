@@ -57,6 +57,14 @@ In the long run, I plan to diverge significantly from Fermion.  Most notably I
 plan to remove the SML feature and a lot of the static file serving features, so
 beware of relying on these.
 
+Caveats
+-------
+
+Currently some very notable features are missing.
+
+1.  There is no way to specify a document root for the server.
+2.  There is no way to specify an interface for the server to listen on.
+
 Concurrency
 -----------
 
