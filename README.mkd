@@ -24,9 +24,23 @@ Boson depends on the following R6RS libraries:
   https://code.launchpad.net/~scheme-libraries-team/scheme-libraries/srfi
 * spells, available at https://github.com/rotty/spells
 * (wak irregex) from http://gitorious.org/wak
+** (wak common) indirectly.
 
 I suggest to use the most recent version of all of these.  As of this writing
 (2011-04-19), all have recent changes which are necessary to run Boson
+
+As there is no agreed way to install R6RS code, the following conventions are
+used by the Makefile:
+
+* All R6RS code is expected to be found under /usr/local/share/scheme/r6rs.
+* The Scheme interpreter is expected to be found at 'scheme-r6rs' in the PATH.
+* The Scheme interpreter should already know to look in
+  /usr/local/share/scheme/r6rs for libraries, as in Boson doesn't try to tell it
+  about this path.  Most implementations accept an environment variable of the
+  style IKARUS_LIBRARY_PATH, MOSH_LOADPATH, etc.  You can set this variable
+  yourself in the traditional style for your OS.  Alternatively, if you use
+  Mosh, I provide Debian packages with this load path included by default.
+
 
 Test suite
 ----------
