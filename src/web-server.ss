@@ -160,7 +160,7 @@
     (let ((conf (web-server-s-configuration self)))
       (guard (error
               (#t
-               (write-log self (list "Error: ~a" (condition-message error)))
+               (write-log self (list "Error: ~a" error))
                (let ((str
                       (cond
                        ((string? error) error)
