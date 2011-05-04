@@ -27,8 +27,11 @@ Boson depends on the following R6RS libraries:
 ** (wak common) indirectly.
 
 I suggest to use the most recent version of all of these.  As of this writing
-(2011-04-19), all have recent changes which are necessary to run Boson
+(2011-04-19), all have recent changes which are necessary to run Boson.
 
+The test suite additionally depends on the following:
+* (sistim wrap64) available from http://solasistim.net/page/code
+* (ocelotl net http-client) available from https://github.com/rotty/ocelotl
 As there is no agreed way to install R6RS code, the following conventions are
 used by the Makefile:
 
@@ -69,7 +72,10 @@ functionality.
 
 In the long run, I plan to diverge significantly from Fermion.  Most notably I
 plan to remove the SML feature and a lot of the static file serving features, so
-beware of relying on these.
+beware of relying on these.  I might also remove some homespun functionality and
+replace it with external libraries.
+
+Possibly check out the ocelotl scheduler?
 
 Caveats
 -------
