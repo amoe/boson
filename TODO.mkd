@@ -6,6 +6,12 @@ the client connection: preferably the requesting IP address should be written to
 the log file, but Mosh currently does not provide a way to get this information
 from a socket.  Support would also need to added to (spells network) library.
 
+Example exception handler for a 404:
+
+Error: #(struct:exn:fail:filesystem file-size: file not found:
+"/home/amoe/./favicon.ico" #<continuation-mark-set>) in connection
+127.0.0.1:20154.
+
 * Handle mapping between URIs and servlet hierarchies, like
 (my-web-app entry-point)
 

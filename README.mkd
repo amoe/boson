@@ -24,7 +24,8 @@ Boson depends on the following R6RS libraries:
   https://code.launchpad.net/~scheme-libraries-team/scheme-libraries/srfi
 * spells, available at https://github.com/rotty/spells
 * (wak irregex) from http://gitorious.org/wak
-** (wak common) indirectly.
+* (wak common) indirectly.
+* (sistim condition-formatter) for printing errors
 
 I suggest to use the most recent version of all of these.  As of this writing
 (2011-04-19), all have recent changes which are necessary to run Boson.

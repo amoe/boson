@@ -14,6 +14,7 @@
           (boson compat)
           (only (srfi :13) string-trim-both string-null?)
           (spells network)
+          (sistim condition-formatter)
           (prefix (boson request-parser) parser::)
           (prefix (boson resource-loader) loader::)
           (prefix (boson response) response::)
@@ -160,13 +161,13 @@
     (let ((conf (web-server-s-configuration self)))
       (guard (error
               (#t
-               (write-log self (list "Error: ~a" error))
                (let ((str
                       (cond
                        ((string? error) error)
                        ((parser::http-parser-error? error)
                         (parser::http-parser-error-message error))
-                       (else (condition-message error)))))
+                       (else (format-condition error)))))
+                 (write-log self (list "Error: ~a" str))
                  (return-error self client-socket str conf))))
              (debug "Reading request")
              (let* ((http-request (read-header conf client-socket))
