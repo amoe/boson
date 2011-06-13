@@ -7,6 +7,7 @@
         (prefix (boson util) util:)
         (prefix (boson sml-parser) sml-parser:)
         (prefix (boson request-parser) request-parser:)
+        (prefix (boson response) response:)
         (sistim wrap64))
 
 (define-syntax test-not-error
@@ -182,4 +183,62 @@
   (test-error (request-parser:http-parser-error-message 2))
 )
 
+(test-end)
+
+
+(test-begin "response")
+(test-assert response:make-response)
+
+(let* ((content "Hello, world!")
+       (len (string-length content))
+       (time (util:current-seconds)))
+  (let ((res (response:make-response "HTTP/1.0"
+                                     content
+                                     len
+                                     "text/plain"
+                                     time)))
+    (test-assert res)
+    (test-equal "HTTP/1.0 200 OK" (response:response-status-line res))
+    (test-not-error
+     (response:response-status-line! res "HTTP/1.1 200 OK"))
+    (test-equal "HTTP/1.1 200 OK" (response:response-status-line res))
+    (let ((new-headers (make-hashtable equal-hash equal?))
+          (old-headers (response:response-headers res)))
+      (test-assert (hashtable? old-headers))
+      (hashtable-set! new-headers "foo" "bar")
+      (test-not-error (response:response-headers! res new-headers))
+      (test-equal "bar" (hashtable-ref (response:response-headers res) "foo"))
+      (test-not-error (response:response-headers! res old-headers)))
+
+    (test-equal content (response:response-body res))
+    (let ((new-content (string-append content "  Hello, universe!")))
+      (test-not-error
+       (response:response-body! res new-content))
+      (test-equal new-content (response:response-body res)))
+
+    (test-equal "text/plain" (response:response-header-value
+                 (response:response-headers res) "Content-Type"))
+    (let ((new-value "application/xml"))
+     (test-not-error (response:response-header-value!
+                      (response:response-headers res)
+                      "Content-Type" new-value))
+     (test-equal new-value
+                 (response:response-header-value
+                  (response:response-headers res) "Content-Type")))
+
+    (let ((string-version (response:response->string res))
+          (full-version (response:response->string res #t)))
+      (test-assert (string? string-version))
+      (test-assert (> (string-length string-version) len))
+      (test-assert (> (string-length full-version)
+                      (string-length string-version))))))
+
+(let ((res (response:make-error-response "FAIL"
+                                         404
+                                         "HTTP/1.0")))
+  (test-assert res)
+  (test-equal "HTTP/1.0 404 FAIL" (response:response-status-line res)))
+
+
+(test-assert response:response->string)
 (test-end)
