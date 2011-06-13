@@ -5,7 +5,15 @@
         (prefix (boson session-util) session-util:)
         (prefix (boson url-encode) url-encode:)
         (prefix (boson util) util:)
+        (prefix (boson sml-parser) sml-parser:)
+        (prefix (boson request-parser) request-parser:)
         (sistim wrap64))
+
+(define-syntax test-not-error
+  (syntax-rules ()
+    ((test-no-error expr)
+     (test-assert (begin expr #t)))))
+      
 
 (test-begin "globals")
 (test-assert (char? globals:*sess-id-sep*))
@@ -90,3 +98,88 @@
   (test-eqv 3 counter))
 
 (test-end "util")
+
+
+(test-begin "sml-parser")
+(let ((document "foo")
+      (data  (make-hashtable equal-hash equal?))
+      (header "<html><head><title>Add two numbers</title></head><body>")
+      (footer "</body></html>")
+      (dynamic
+"<?spark
+  \"Number1=$num1<br>\"
+  \"Number2=$num2<br>\"
+  \"<b>Result=\"
+  (+ $num1 $num2)
+  \"</b>\"
+?>"))
+         
+
+  (test-assert data)
+
+  ; Identity transform.
+  (test-equal document
+               (sml-parser:execute-embedded-script document data))
+
+  (hashtable-set! data "foo" "bar")
+
+  (test-equal "bar"
+               (sml-parser:execute-embedded-script "<?spark \"$foo\" ?>"
+                                                   data))
+
+  (hashtable-set! data "num1" "2")
+  (hashtable-set! data "num2" "3")
+
+  (test-equal (string-append header
+                             "Number1=2<br>Number2=3<br><b>Result=5</b>"
+                             footer)
+               (sml-parser:execute-embedded-script (string-append header
+                                                                  dynamic
+                                                                  footer)
+                                                   data)))
+
+
+(test-end "sml-parser")
+
+(test-begin "request-parser")
+(let ((req (request-parser:http-request)))
+  ; As a predicate isn't exported, the data structure is totally opaque.
+  (test-assert req)
+
+  (test-assert request-parser:http-request)
+
+  (test-not-error
+   (request-parser:http-request-request! req "GET /some/path HTTP/1.0"))
+  (test-equal 'GET (request-parser:http-request-method req))
+  (test-equal "/some/path" (request-parser:http-request-uri req))
+  (test-equal "HTTP/1.0" (request-parser:http-request-version req))
+
+  ; invalid method
+  (test-error
+   (request-parser:http-request-request! req "TRACE / HTTP/1.0"))
+
+  (test-not-error
+   (request-parser:http-request-header! req "Content-Type: application/xml"))
+  (test-equal "application/xml"
+              (request-parser:http-request-header req "content-type" 'nonesuch))
+  (test-eq 'nonesuch
+           (request-parser:http-request-header req "content-length" 'nonesuch))
+
+  (test-not-error
+   (request-parser:http-request-data! req "foo=bar&baz=quux&fry=leela"))
+
+  (let ((query-string (request-parser:http-request-data req)))
+    (test-assert (hashtable? query-string))
+    (test-equal "bar" (hashtable-ref query-string "foo"))
+    (test-equal "quux" (hashtable-ref query-string "baz"))
+    (test-equal "leela" (hashtable-ref query-string "fry")))
+  
+  (test-assert (hashtable? (request-parser:http-request-headers req)))
+
+  ; No ability to instantitate these is actually exported!
+  ; So just check for really obvious things
+  (test-assert (procedure? request-parser:http-parser-error?))
+  (test-error (request-parser:http-parser-error-message 2))
+)
+
+(test-end)
