@@ -5,6 +5,8 @@ libdir = $(prefix)/share/scheme/r6rs
 bindir = $(prefix)/bin
 libname = boson
 
+scheme = scheme-r6rs
+
 daemontools_path = $(prefix)/etc/daemontools/boson
 
 live:
@@ -22,5 +24,5 @@ install_dt: install
 
 test:
 	if [ ! -h boson ]; then ln -s src boson; fi
-	mosh --loadpath=/usr/local/share/scheme/r6rs test.scm
+	$(scheme) test.scm
 	rm -f boson
