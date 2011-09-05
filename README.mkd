@@ -82,6 +82,9 @@ Currently some very notable features are missing.
 
 1.  There is no way to specify a document root for the server.
 2.  There is no way to specify an interface for the server to listen on.
+3.  There is no capacity for the server to daemonize itself.
+4.  There is no way to a servlet to know which method it has been requested with.
+5.  The extended session servlet API is broken (two arguments)
 
 Concurrency
 -----------
