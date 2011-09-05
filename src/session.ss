@@ -60,13 +60,12 @@
               (hashtable-for-each
                state-to-add 
                (lambda (k v) (hashtable-set! state k v)))
-              (guard (ex
-                      ((procedure? ex)
-                       (set! proc-count (find-proc-index ex procs))
-                       (set! res-html
-                             (session-execute-procedure
-                              url procs sess-id proc-count state-to-add
-                              sessions))))
+              (guard (ex ((procedure? ex)
+                          (set! proc-count (find-proc-index ex procs))
+                          (set! res-html
+                                (session-execute-procedure
+                                 url procs sess-id proc-count state-to-add
+                                 sessions))))
                      (when (not (http-share-state? state))
                            (set! sess (session-remap sess sessions))
                            (set! id (session-s-id sess)))
