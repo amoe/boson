@@ -30,7 +30,7 @@
                                  (make-session-url script-url sess-id 0)
                                  (make-default-session-state sess-id)
                                  (current-seconds)))
-           (state (make-default-session-state sess-id)))
+           (state (make-default-session-state sess-id))) ; FIXME redundant
       (hashtable-set! sessions sess-id sess)
       sess))
 
