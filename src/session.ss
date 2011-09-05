@@ -115,7 +115,7 @@
                 -1)))))
 
   (define (normalize-url url)
-    (let ((idx (string-index-right url "/")))
+    (let ((idx (string-index-right url #\/)))    ; find last forward slash
       (if idx
           (substring url (+ idx 1) (string-length url))
           url)))
