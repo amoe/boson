@@ -376,11 +376,19 @@
     (for-each
      (lambda (sess-id) (session:session-destroy sess-id sessions))
      (vector->list (hashtable-keys sessions))))
-  (test-eqv 0 (hashtable-size sessions)))
+  (test-eqv 0 (hashtable-size sessions))
   
+
+  (session:session-execute-procedure
+   url
+   non-final-session
+   "nonexistent-5"
+   0
+   empty-state
+   sessions)
+
+  (let ((sess-id (vector-ref (hashtable-keys sessions) 0)))
+    (let ((sess (hashtable-ref sessions sess-id)))
+      (test-assert (integer? (session:session-last-access sess))))))
    
-
-
-(test-assert session:session-destroy)
-(test-assert session:session-last-access)
 (test-end)
