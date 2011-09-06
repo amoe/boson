@@ -246,12 +246,12 @@
 
 ; Sessions must be an eqv hashtable.
 
-; functionalities:
-;  test the state is added correctly -- DONE.
-;  test the session is created if it doesn't exist when passed in -- DONE
-;  test the correct procedure is executed -- DONE
-;  check the session is destroyed if the proc is out of range -- DONE
-;  check that http-keep-alive! works to prevent session destruction -- DONE
+; functionalities of SESSION-EXECUTE-PROCEDURE:
+;  test the state is added correctly
+;  test the session is created if it doesn't exist when passed in
+;  test the correct procedure is executed
+;  check the session is destroyed if the proc is out of range
+;  check that http-keep-alive! works to prevent session destruction
 ;  check a different procedure is executed if the procedure throws
 ;    an exception
 ;  check that the single-procedure call form for PROCS is working
@@ -358,13 +358,29 @@
                                          "nonexistent-3"
                                          0
                                          empty-state
-                                         sessions))))
+                                         sessions)))
+
+  ; Check the single non-session form works.
+  (let ((val 'return-value))
+    (let ((ret (session:session-execute-procedure url
+                                                    (lambda (s) (cons val s))
+                                                    "nonexistent-4"
+                                                    #f
+                                                    empty-state
+                                                    #f)))
+      (test-eq val (car ret))
+      (test-assert (hashtable? (cdr ret)))))
+
+  ; Test for SESSION-DESTROY
+  (test-not-error
+    (for-each
+     (lambda (sess-id) (session:session-destroy sess-id sessions))
+     (vector->list (hashtable-keys sessions))))
+  (test-eqv 0 (hashtable-size sessions)))
+  
    
 
-   
 
-; (url procs sess-id p-count state-to-add sessions)
-(test-assert session:session-execute-procedure)
 (test-assert session:session-destroy)
 (test-assert session:session-last-access)
 (test-end)
