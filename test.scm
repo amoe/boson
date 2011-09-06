@@ -8,6 +8,9 @@
         (prefix (boson sml-parser) sml-parser:)
         (prefix (boson request-parser) request-parser:)
         (prefix (boson response) response:)
+        (prefix (boson session) session:)
+        (only (srfi :1) make-list)
+        (srfi :48)
         (sistim wrap64))
 
 (define-syntax test-not-error
@@ -187,8 +190,6 @@
 
 
 (test-begin "response")
-(test-assert response:make-response)
-
 (let* ((content "Hello, world!")
        (len (string-length content))
        (time (util:current-seconds)))
@@ -238,7 +239,114 @@
                                          "HTTP/1.0")))
   (test-assert res)
   (test-equal "HTTP/1.0 404 FAIL" (response:response-status-line res)))
+(test-end)
 
 
-(test-assert response:response->string)
+(test-begin "session")
+
+; Sessions must be an eqv hashtable.
+
+; functionalities:
+;  test the state is added correctly -- DONE.
+;  test the session is created if it doesn't exist when passed in -- DONE
+;  test the correct procedure is executed -- DONE
+;  check the session is destroyed if the proc is out of range -- DONE
+;  check that http-keep-alive! works to prevent session destruction -- DONE
+;  check a different procedure is executed if the procedure throws
+;    an exception
+;  check that the single-procedure call form for PROCS is working
+
+; Some procedures to allow us to easily check the right procedure was called.
+(define (constant-session-procedure x)
+  (lambda (session-url state) x))
+
+(let ((sessions (make-eqv-hashtable))
+      (url "http://www.google.com/")
+      (empty-state (make-hashtable equal-hash equal?))
+      (non-final-session (make-list 2 (constant-session-procedure #t))))
+  (let ((procs (map constant-session-procedure (list 1 2 3)))
+        (sess-id "nonexistent-1"))
+    (test-eqv 2 (session:session-execute-procedure url
+                                                   procs
+                                                   sess-id
+                                                   1   ; idx?
+                                                   empty-state
+                                                   sessions)))
+  ; A new key has now been added to sessions.
+  (test-eqv 1 (hashtable-size sessions))
+
+  (let ((sess-id (vector-ref (hashtable-keys sessions) 0)))
+    ; We can only access the state through the medium of dance^Wsession
+    ; procedures.
+    ; We use two procedures in the list because the session is destroyed if
+    ; you execute the last procedure in the list.
+    (let ((state (session:session-execute-procedure
+                  url
+                  (list
+                   (lambda (session-url s) s)
+                   (lambda (session-url s) s))
+                  sess-id
+                  0    ; first procedure in list
+                  empty-state
+                  sessions))
+          (additional-state (make-hashtable equal-hash equal?)))
+        ; Test adding state in the call.
+      (test-false (session-util:http-value state "thisone"))
+      (hashtable-set! additional-state "thisone" 42)
+      (session:session-execute-procedure url
+                                         non-final-session
+                                         sess-id
+                                         0
+                                         additional-state
+                                         sessions)
+      (test-eqv 42 (session-util:http-value state "thisone")))
+
+
+    ; Test if this session is destroyed when the final procedure is called.
+
+    (session:session-execute-procedure
+     url
+     (list (constant-session-procedure #t))
+     sess-id
+     0
+     empty-state
+     sessions)
+    (test-eqv 0 (hashtable-size sessions)))
+
+    ; Test if HTTP-KEEP-ALIVE! works to prevent session destruction.
+  (let ((state (session:session-execute-procedure
+                url
+                (list
+                 (lambda (session-url s) s)
+                 (lambda (session-url s) s))
+                "nonexistent-2"
+                0    ; first procedure in list
+                empty-state
+                sessions)))
+    (let ((sess-id (vector-ref (hashtable-keys sessions) 0)))
+      (test-eqv 1 (hashtable-size sessions))
+      (session-util:http-keep-alive! state #t)
+      (session:session-execute-procedure url
+                                         (list (constant-session-procedure #t))
+                                         sess-id
+                                         0
+                                         empty-state
+                                         sessions)
+      (test-eqv 1 (hashtable-size sessions)))))
+
+  ; Test if we can throw an exception to jump to an arbitrary procedure
+  ; TODO
+                                           
+                                           
+        
+
+      
+                                         
+
+   
+
+; (url procs sess-id p-count state-to-add sessions)
+(test-assert session:session-execute-procedure)
+(test-assert session:session-destroy)
+(test-assert session:session-last-access)
 (test-end)

@@ -59,7 +59,8 @@
                   (res-html #f))
               (hashtable-for-each
                state-to-add 
-               (lambda (k v) (hashtable-set! state k v)))
+               (lambda (k v)
+                 (hashtable-set! state k v)))
               (guard (ex ((procedure? ex)
                           (set! proc-count (find-proc-index ex procs))
                           (set! res-html
@@ -72,11 +73,13 @@
                      (set! res-html ((list-ref procs (- proc-count 1))
                                      (make-session-url url id proc-count)
                                      state)))
-              (if (>= proc-count procs-len)
-                  (if (not (http-keep-alive? state))
+              (when (>= proc-count procs-len)
+                  (when (not (http-keep-alive? state))
                       (session-destroy id sessions)))
               res-html)))))
 
+  ; Using eq? with procedures is totally not portable.
+  ; What should we do?
   (define (find-proc-index proc procs-list)
     (or 
      (list-index (lambda (p) (eq? p proc)) procs-list)
