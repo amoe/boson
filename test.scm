@@ -332,16 +332,34 @@
                                          0
                                          empty-state
                                          sessions)
-      (test-eqv 1 (hashtable-size sessions)))))
+      (test-eqv 1 (hashtable-size sessions))))
 
   ; Test if we can throw an exception to jump to an arbitrary procedure
-  ; TODO
-                                           
-                                           
-        
+  (let ((procs
+         (list
+          (lambda (u s) (raise (session:make-session-jump-condition 2)))
+          (lambda (u s) "I will never be reached")
+          (lambda (u s) 'some-return-value))))
+    (test-eq 'some-return-value
+             (session:session-execute-procedure url
+                                                procs
+                                                "nonexistent-3"
+                                                0
+                                                empty-state
+                                                sessions)))
 
-      
-                                         
+  ; Make sure the old method errors.
+  (letrec ((proc1 (lambda (u s) (raise proc3)))
+           (proc2 (lambda (u s) "I will never be reached"))
+           (proc3 (lambda (u s) 'should-also-not-be-reached)))
+    (test-error error?
+      (session:session-execute-procedure url
+                                         (list proc1 proc2 proc3)
+                                         "nonexistent-3"
+                                         0
+                                         empty-state
+                                         sessions))))
+   
 
    
 

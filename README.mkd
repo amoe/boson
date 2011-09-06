@@ -85,6 +85,8 @@ Currently some very notable features are missing.
 3.  There is no capacity for the server to daemonize itself.
 4.  There is no way to a servlet to know which method it has been requested with.
 5.  The extended session servlet API is broken (two arguments)
+6.  You can't throw a procedure to jump to it, instead you must raise a
+    condition of type &session-jump with the procedure's index.
 
 Concurrency
 -----------

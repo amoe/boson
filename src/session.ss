@@ -1,7 +1,8 @@
 (library (boson session)
   (export session-execute-procedure
           session-destroy
-          session-last-access)
+          session-last-access
+          make-session-jump-condition)
   (import (rnrs)
           (boson util)
           (boson globals)
@@ -17,6 +18,13 @@
                      session-s-state set-session-s-state!)
             (mutable last-access
                      session-s-last-access set-session-s-last-access!)))
+
+  ; Used to implement a non-local control transfer for session procedures, as
+  ; the previous system relied on procedure equality which is not portable under
+  ; R6RS.
+  (define-condition-type &session-jump &condition
+    make-session-jump-condition session-jump-condition?
+    (index condition-index))
 
   (define *session-id* 0)
   (define *vars-sep* #\?)
@@ -61,12 +69,15 @@
                state-to-add 
                (lambda (k v)
                  (hashtable-set! state k v)))
-              (guard (ex ((procedure? ex)
-                          (set! proc-count (find-proc-index ex procs))
+              (guard (ex ((session-jump-condition? ex)
+                          (set! proc-count (condition-index ex))
                           (set! res-html
                                 (session-execute-procedure
                                  url procs sess-id proc-count state-to-add
-                                 sessions))))
+                                 sessions)))
+                         ((procedure? ex)
+                          (error 'session-execute-procedure
+                                 "do not raise procedures for jumps, see doc")))
                      (when (not (http-share-state? state))
                            (set! sess (session-remap sess sessions))
                            (set! id (session-s-id sess)))
