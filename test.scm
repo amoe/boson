@@ -11,6 +11,7 @@
         (prefix (boson session) session:)
         (prefix (boson resource-loader) resource-loader:)
         (prefix (boson web-server) web-server:)
+        (prefix (boson mime-types) mime-types:)
         (only (srfi :1) make-list)
         (srfi :48)
         (sistim wrap64))
@@ -419,3 +420,24 @@
     (test-assert (integer? (resource-loader:resource-content-last-modified res)))))
 (test-end "resource-loader")
 
+
+(test-begin "mime-types")
+(test-assert mime-types:find-mime-type)
+(let ((res (mime-types:find-mime-type "myfile.html")))
+  (test-assert (pair? res))
+  (test-assert (string? (car res)))
+  (test-assert (string? (cdr res))))
+(test-end "mime-types")
+
+
+(test-begin "web-server")
+(test-assert web-server:web-server)
+(test-assert web-server:web-server-start)
+(test-assert web-server:web-server-stop)
+(test-assert web-server:web-server-socket)
+(test-assert web-server:web-server-configuration)
+(test-assert web-server:web-server-configuration!)
+(test-assert web-server:web-server-hook!)
+(test-assert web-server:write-log)
+(test-assert web-server:on-client-connect)
+(test-end "web-server")

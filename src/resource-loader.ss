@@ -76,7 +76,8 @@
 
   (define (content-type uri) 
     (let ((mt (find-mime-type uri)))
-      (if (not mt) "text/html"
+      (if (not mt)
+          "text/html"
           (cdr mt))))
   
   (define (load-resource self uri 
