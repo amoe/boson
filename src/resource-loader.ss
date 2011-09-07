@@ -144,6 +144,7 @@
   (define *ss-script-ext* #f)
   (define *embedded-script-ext* #f)
 
+  ; Handle case where the conf doesn't contain a script-ext
   (define (script-ext conf)
     (if (not *ss-script-ext*)
         (set! *ss-script-ext* (hashtable-ref conf 'script-ext #f)))

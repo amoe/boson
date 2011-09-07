@@ -9,6 +9,8 @@
         (prefix (boson request-parser) request-parser:)
         (prefix (boson response) response:)
         (prefix (boson session) session:)
+        (prefix (boson resource-loader) resource-loader:)
+        (prefix (boson web-server) web-server:)
         (only (srfi :1) make-list)
         (srfi :48)
         (sistim wrap64))
@@ -392,3 +394,28 @@
       (test-assert (integer? (session:session-last-access sess))))))
    
 (test-end)
+
+
+(test-begin "resource-loader")
+(let ((self (resource-loader:resource-loader))
+      (web-server-conf (make-eq-hashtable))
+      (http-request (request-parser:http-request))
+      (sessions #f))
+
+  (hashtable-set! web-server-conf 'script-ext ".ss")
+  (hashtable-set! web-server-conf 'embedded-script-ext ".sml")
+  (hashtable-set! web-server-conf 'max-response-size (expt 2 20))
+
+  (request-parser:http-request-request! http-request "GET /test.scm HTTP/1.0")
+  (test-assert (record? self))
+  (let ((res (resource-loader:resource-loader-load self
+                                                   web-server-conf
+                                                   http-request
+                                                   sessions)))
+    (test-assert (record? res))
+    (test-assert (bytevector? (resource-loader:resource-content res)))
+    (test-assert (string? (resource-loader:resource-content-type res)))
+    (test-assert (integer? (resource-loader:resource-content-length res)))
+    (test-assert (integer? (resource-loader:resource-content-last-modified res)))))
+(test-end "resource-loader")
+
