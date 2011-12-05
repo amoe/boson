@@ -16,3 +16,8 @@ Error: #(struct:exn:fail:filesystem file-size: file not found:
 (my-web-app entry-point)
 
 * Vulnerable to path traversal.
+
+* No errror pages or codes at the moment, just an empty reply!
+  Confirm if that's also the case using the spark server
+
+* Argument order of hashtable-for-each

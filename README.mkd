@@ -44,13 +44,30 @@ variable.  Alternatively, if you install these libraries to
 /usr/local/share/scheme/r6rs, my Mosh packages for Debian come pre-patched with
 the correct path.
 
-
 Test suite
 ----------
 
 The test suite is contained in the file test.scm.  It uses the library (sistim
 wrap64) which is a custom test runner for the SRFI-64 testing API.  You can
 execute the tests using 'make test'.
+
+Running
+-------
+
+Run the binary 'boson'.  The server will listen on port 8080 by default.
+It will serve static content by default.
+Scheme servlets are identified by default with the extension '.ss'.
+
+Here is a very simple servlet::
+
+    (library (hello)
+      (export start)
+      (import (rnrs))
+
+      (define (start req)
+        "Hello, world"))
+
+Save to 'hello.ss'.
 
 Goals
 -----
