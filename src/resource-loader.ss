@@ -1,3 +1,8 @@
+; resource-loader.ss - loads resources to be sent to http clients
+; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
+; copyright 2011 David Banks <amoebae@gmail.com>
+; license: GPL-3+
+
 (library (boson resource-loader)
   (export resource-loader 
           resource-loader-load

@@ -1,3 +1,8 @@
+; resource-loader.ss - http response wrapper
+; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
+; copyright 2011 David Banks <amoebae@gmail.com>
+; license: GPL-3+
+
 (library (boson response)
   (export make-response 
           make-error-response

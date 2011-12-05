@@ -1,3 +1,8 @@
+; mime-types.ss - http mime types
+; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
+; copyright 2011 David Banks <amoebae@gmail.com>
+; license: GPL-3+
+
 (library (boson mime-types)
   (export find-mime-type)
   (import (rnrs)

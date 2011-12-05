@@ -1,3 +1,8 @@
+; sml-parser.ss - parser for SML template language
+; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
+; copyright 2011 David Banks <amoebae@gmail.com>
+; license: GPL-3+
+
 (library (boson sml-parser)
   (export execute-embedded-script)
   (import (rnrs)

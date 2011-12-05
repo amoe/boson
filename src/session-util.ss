@@ -1,3 +1,8 @@
+; session-util.ss - some utilities that make working with sessions easier
+; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
+; copyright 2011 David Banks <amoebae@gmail.com>
+; license: GPL-3+
+
 (library (boson session-util)
   (export http-value
           http-value! 

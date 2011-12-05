@@ -1,3 +1,8 @@
+; sml-parser.ss - url decoding procedures
+; Copyright (C) 2007-2010 Vijay Mathew Pandyalakal
+; copyright 2011 David Banks <amoebae@gmail.com>
+; license: GPL-3+
+
 (library (boson url-encode)
   (export url-decode)
   (import (rnrs)
