@@ -106,6 +106,7 @@ Currently some very notable features are missing.
 5.  The extended session servlet API is broken (two arguments)
 6.  You can't throw a procedure to jump to it, instead you must raise a
     condition of type &session-jump with the procedure's index.
+7.  Servlets cannot accept data with the POST method.
 
 Concurrency
 -----------

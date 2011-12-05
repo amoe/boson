@@ -20,6 +20,8 @@
           (boson sml-parser)
           (boson mime-types)
           (spells pathname)
+          (only (spells filesys) working-directory)
+          (only (srfi :1) take)
           (only (srfi :13) string-index))
 
   (define-record-type resource-loader-s
@@ -138,7 +140,23 @@
         (set! uri (string-append "." uri)))
     (if (string=? uri "./")
         (set! uri "./index.html"))
+
+    (when (not (safe-uri? uri))
+      (error 'normalize-uri "unsafe URI" uri))
+    
     uri)
+
+  (define (safe-uri? uri)
+    (let* ((base (pathname-as-directory (working-directory)))
+           (new-base (pathname-join base uri)))
+      (let* ((prefix (pathname-directory base))
+             (prefix-len (length prefix))
+             (new-prefix (pathname-directory new-base)))
+        (cond
+          ((< (length new-prefix) prefix-len) #f)
+          (else
+           (equal? prefix (take new-prefix prefix-len)))))))
+          
 
   (define (find-res-type uri conf)
     (let ((ext (filename-extension uri)))
