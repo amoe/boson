@@ -431,7 +431,24 @@
 
 
 (test-begin "web-server")
-(test-assert web-server:web-server)
+
+; Test 3 call forms
+
+(define (delete-file/uncaring filename)
+  (guard (ex ((i/o-filename-error? ex)  #t))
+    (delete-file filename)))
+
+(define *log-file-name* "test-output.log")
+(delete-file/uncaring *log-file-name*)    ; XXX: CAN DELETE USER FILE
+
+(let ((conf '(port 8080))
+      (log-port (open-file-output-port *log-file-name*)))
+  (let ((ws (web-server:web-server conf log-port)))
+    (test-assert (record? ws))
+    (close-port log-port)
+    (delete-file/uncaring *log-file-name*)))
+
+
 (test-assert web-server:web-server-start)
 (test-assert web-server:web-server-stop)
 (test-assert web-server:web-server-socket)
