@@ -16,7 +16,3 @@ Error: #(struct:exn:fail:filesystem file-size: file not found:
 (my-web-app entry-point)
 
 * Vulnerable to path traversal.
-
-The session code uses throwing a procedure and procedure EQ? to allow stuff.
-This doesn't work.  Since each procedure necessarily knows its own index,
-suggest deriving a condition type, and using that instead.
