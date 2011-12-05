@@ -18,6 +18,8 @@ R6RS-compliant system.  It has been tested with the following systems:
 Installation
 ------------
 
+Run 'bootstrap.sh' to create a makefile link.
+
 Boson depends on the following R6RS libraries:
 
 * SRFI collection at
