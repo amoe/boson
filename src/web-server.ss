@@ -38,11 +38,13 @@
             log-port))
 
   (define *HTTP-VERSION* "HTTP/1.0")
+  (define *debug* #f)
 
   (define (debug msg)
-    (display msg)
-    (newline)
-    (flush-output-port (current-output-port)))
+    (when *debug*
+      (display msg)
+      (newline)
+      (flush-output-port (current-output-port))))
 
   ;; (list) -> web-server
   ;; Creates a new web-server object. The list argument
