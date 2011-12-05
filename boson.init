@@ -1,0 +1,44 @@
+#! /bin/sh
+
+. /lib/lsb/init-functions
+
+boson_path=/usr/local/bin/boson
+
+main() {
+    action=$1
+    case "$action" in
+        start) action_start ;;
+        stop) action_stop ;;
+        restart) action_restart ;;
+        force-reload) action_force_reload ;;
+        status) action_status ;;
+        *)
+            log_failure_msg "unknown action: $action"
+            exit 1
+            ;;
+    esac
+}
+
+action_start() {
+    start_daemon "$boson_path"
+}
+
+action_stop() {
+    killproc "$boson_path"
+}
+
+action_restart() {
+    action_stop
+    action_start
+}
+
+action_force_reload() {
+    log_failure_msg "not implemented"
+}
+
+action_status() {
+    log_failure_msg "not implemented"
+}
+
+
+main "$@"
