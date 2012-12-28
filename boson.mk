@@ -9,9 +9,6 @@ scheme = scheme-r6rs
 
 daemontools_path = $(prefix)/etc/daemontools/boson
 
-live:
-	rsync -rtv
-
 install:
 	cp run-server.sps $(bindir)/boson
 	chmod +x $(bindir)/boson
