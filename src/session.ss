@@ -86,13 +86,15 @@
                      (when (not (http-share-state? state))
                            (set! sess (session-remap sess sessions))
                            (set! id (session-s-id sess)))
-                     (set! res-html ((list-ref procs (- proc-count 1))
-                                     (make-session-url url id proc-count)
-                                     state)))
+		     ; NB: This is where the servlet procedure is actually
+		     ; (finally) invoked.
+		     (let ((servlet-proc (list-ref procs (- proc-count 1)))
+			   (session-url (make-session-url url id proc-count)))
+		       (set! res-html (servlet-proc session-url state))))
               (when (>= proc-count procs-len)
                   (when (not (http-keep-alive? state))
                       (session-destroy id sessions)))
-              res-html)))))
+              res-html))))
 
   ; Using eq? with procedures is totally not portable.
   ; What should we do?
