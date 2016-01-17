@@ -33,6 +33,16 @@
             content-length
             content-last-modified))
 
+  (define *debug* #t)
+
+
+  (define (debug msg)
+    (when *debug*
+      (display msg)
+      (newline)
+      (flush-output-port (current-output-port))))
+
+
   (define (resource-loader)
     (make-resource-loader-s (make-hashtable equal-hash equal?)
                             (make-hashtable equal-hash equal?)))
@@ -40,6 +50,7 @@
   ;; Returns an instance of resource-s
   (define (resource-loader-load self web-server-conf
                                 http-request sessions)
+    (debug "Inside RESOURCE-LOADER-LOAD")
     (let* ((uri (normalize-uri (http-request-uri http-request)))
            (uri-data (parse-uri uri))
            (root-uri (list-ref uri-data 0))
@@ -89,6 +100,7 @@
   
   (define (load-resource self uri 
                          type web-server-conf)
+    (debug "Inside LOAD-RESOURCE")
     (case type
       ((embedded-script) 
        (read-sml self uri web-server-conf))
@@ -114,7 +126,9 @@
             (values sz content)))))
 
   (define (read-fresh-file uri web-server-conf)
+    (debug "About to call FILE-SIZE-IN-BYTES")
     (let ((sz (file-size-in-bytes uri)))
+      (debug "Called FILE-SIZE-IN-BYTES")
       (when (> sz (hashtable-ref web-server-conf 'max-response-size #f))
             (raise "Response will exceed maximum limit."))
       (values sz

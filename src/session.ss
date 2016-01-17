@@ -94,7 +94,7 @@
               (when (>= proc-count procs-len)
                   (when (not (http-keep-alive? state))
                       (session-destroy id sessions)))
-              res-html))))
+              res-html)))))
 
   ; Using eq? with procedures is totally not portable.
   ; What should we do?
