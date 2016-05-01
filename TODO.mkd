@@ -1,6 +1,8 @@
 TODO
 ----
 
+* Tests for session.ss are causing problems, and also having knock on effects causing subsequent tests to fail
+
 * The exception handler in on-client-connect should provide some way to identify
 the client connection: preferably the requesting IP address should be written to
 the log file, but Mosh currently does not provide a way to get this information
